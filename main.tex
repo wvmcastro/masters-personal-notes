@@ -997,7 +997,7 @@ The estimated error, $\mb{\eta}_\mathbf{k}$, between the system state and the up
        &= \blue{\bvec{x_k} - \mb{\bar{\mu}}_\mathbf{k}} - \mat{K_k}\parentheses{\magenta{\mat{C_k}\bvec{x_k} + \mb{\delta}_\mathbf{k}} - \mat{C_k}\mb{\bar{\mu}}_\mathbf{k}}\\
        &= \blue{\mat{I}\bvec{x_k} - \mat{I}\,\mb{\bar{\mu}}_\mathbf{k}} - \mat{K_k}\parentheses{\mat{C_k}\bvec{x_k} + \mb{\delta}_\mathbf{k} - \mat{C_k}\mb{\bar{\mu}}_\mathbf{k}}\\
        &= \mat{I}\bvec{x_k} - \mat{I}\,\mb{\bar{\mu}}_\mathbf{k} - \mat{K_k}\mat{C_k}\bvec{x_k} - \mat{K_k}\mb{\delta}_\mathbf{k} + \mat{K_k}\mat{C_k}\mb{\bar{\mu}}_\mathbf{k}\\
-       &= \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}\bvec{x_k} - \parentheses{\mat{I} + \mat{K_k}\mat{C_k}}\mb{\bar{\mu}}_\mathbf{k} - \mat{K_k}\mb{\delta}_\mathbf{k}\\
+       &= \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}\bvec{x_k} - \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}\mb{\bar{\mu}}_\mathbf{k} - \mat{K_k}\mb{\delta}_\mathbf{k}\\
        &= \parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \blue{\parentheses{\bvec{x_k} - \mb{\bar{\mu}}_\mathbf{k}}} - \mat{K_k}\mb{\delta}_\mathbf{k}\\
        &= \parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \blue{\bvec{\bar{e}_k}} - \mat{K_k}\mb{\delta}_\mathbf{k}\\
     \end{aligned}
@@ -1185,7 +1185,30 @@ The EKF update equation is given by:
 The EKF estimated error is:
 \begin{equation}
 \begin{aligned}
-    \mb{\tilde\eta}_\mathbf{k} &= \bvec{\tilde{x}_k} - \mb{\tilde{\mu}}_\mathbf{k}
+    \mb{\tilde\eta}_\mathbf{k} &= \bvec{\tilde{x}_k} - \mb{\tilde{\mu}}_\mathbf{k}\\
+    &= \bvec{\tilde{x}_k} - \parentheses{\mb{\bar{\tilde\mu}}_\mathbf{k} + \mat{K_k}\parentheses{\blue{\bvec{\tilde{y}_k}}
+        - \mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k})}}\\
+    &= \bvec{\tilde{x}_k} - \parentheses{\mb{\bar{\tilde\mu}}_\mathbf{k} 
+    + \mat{K_k}\parentheses{\blue{\cancel{\mb{h}(
+        \mb{\bar{\tilde\mu}}_\mathbf{k})} + \mat{H_k}(\bvec{x_k} 
+        - \mb{\bar{\tilde{\mu}}}_\mathbf{k}) 
+        + \mb{\delta}_\mathbf{k}} 
+        - \cancel{\mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k}})}}\\
+    &= \bvec{\tilde{x}_k} - \mat{K_k H_k} \magenta{\bvec{x_k}}
+    - \mb{\bar{\tilde{\mu}}}_\mathbf{k} + \mat{K_k H_k}
+    \mb{\bar{\tilde{\mu}}}_\mathbf{k} + \mat{K_k} \mb{\delta}_\mathbf{k}\\
+    &= \bvec{\tilde{x}_k} - \mat{K_k H_k} \magenta{\bvec{\tilde{x}_k}}
+    - \mb{\bar{\tilde{\mu}}}_\mathbf{k} + \mat{K_k H_k}
+    \mb{\bar{\tilde{\mu}}}_\mathbf{k} + \mat{K_k} \mb{\delta}_\mathbf{k}
+    && \small\text{Applying $\bvec{x_k} \approx \bvec{\tilde{x}_k}$}\\
+    &= \parentheses{\mat{I - K_k H_k}}\bvec{\tilde{x}_k} 
+    -\parentheses{\mat{I - K_k H_k}}\mb{\bar{\tilde{\mu}}}_\mathbf{k}
+    + \mat{K_k} \mb{\delta}_\mathbf{k}\\
+    &= \parentheses{\mat{I - K_k H_k}} \blue{(\bvec{\tilde{x}_k} 
+    - \mb{\bar{\tilde{\mu}}}_\mathbf{k})} 
+    + \mat{K_k} \mb{\delta}_\mathbf{k}\\
+    &= \parentheses{\mat{I - K_k H_k}} \blue{\bvec{\bar{\tilde{e}}_k}} 
+    + \mat{K_k} \mb{\delta}_\mathbf{k}
 \end{aligned}
 \end{equation}
 
