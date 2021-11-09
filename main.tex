@@ -1,0 +1,1948 @@
+\documentclass[12pt]{article}
+\usepackage{geometry}
+     \geometry{
+     a4paper,
+     left=25mm,
+     top=25mm,
+     bottom=15mm,
+     right=15mm
+ }
+\renewcommand{\baselinestretch}{1.5}
+%\usepackage{hyperref}
+\usepackage{tabularx} % smart table. Auto line break to fit page
+\usepackage[normalem]{ulem} %\sout
+\usepackage{relsize} % for changing subscript text size
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,brazil,english]{babel}
+\usepackage{amsfonts} %mathbb
+\usepackage{mathtools}
+\usepackage{amsthm}% proof env
+\usepackage{amssymb} %triangleq
+
+\usepackage{mdframed}
+\newmdtheoremenv{lem}{Lemma}
+
+\newcommand{\bvec}[1]{\mathbf{#1}} % bold vector
+\newcommand{\bvecT}[1]{\mathbf{#1^T}} % bold vector transposed
+\newcommand{\mat}[1]{\mathbf{#1}}
+\newcommand{\matT}[1]{\mathbf{#1^T}}
+\newcommand{\bel}{\mathop{bel}} % belief
+\newcommand{\given}{\,|\,} % p(a \given b) -> p(a | b)
+\newcommand{\cbrac}[1]{\left\{#1\right\}} % curly brackets
+\newcommand{\brac}[1]{\left[#1\right]} % brackets
+\newcommand{\parentheses}[1]{\left(#1\right)}
+\newcommand{\belF}[1]{\mathop{bel}\parentheses{#1}} % belief
+\newcommand{\pr}[1]{p\parentheses{#1}}
+\newcommand{\Int}[4][x]{\int\limits_{#2}^{#3} #4 \dd #1}
+\newcommand{\Sum}[3][i]{\sum\limits_{#1 = #2}^{#3}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\cov}[1]{\mathop{Cov}\parentheses{#1}}
+\newcommand{\mb}[1]{{\boldsymbol{#1}}} %math bold
+\newcommand{\expv}[1]{\mathbb{E}\brac{#1}} % expectation value
+\DeclareMathOperator{\Tr}{Tr}
+\newcommand{\normal}[2]{\mathcal{N}\parentheses{#1, #2}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\matnull}[2]{\mat{0}_{#1\times#2}} % null matrix
+\newcommand{\hot}{\text{h.o.t.}}
+
+% colors
+\newcommand{\blue}[1]{\color{blue}#1\color{black}}
+\newcommand{\magenta}[1]{\color{magenta}#1\color{black}}
+
+%text
+\newcommand{\hsix}[1]{\noindent{\normalsize \textbf{#1}}}
+
+
+\usepackage[thinc]{esdiff} %diffp
+\usepackage{cancel} %cancelto
+\usepackage{siunitx}
+\usepackage{physics} % \dd
+
+% pseudo code
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\algrenewcommand\algorithmicprocedure{\textbf{function}}
+
+\usepackage{tikz,tikz-3dplot, tkz-euclide}
+\usetikzlibrary{arrows.meta}
+\tikzset{>={Latex[round]}}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.12}
+\usepgfplotslibrary{fillbetween}
+
+\usepackage{csquotes}
+\usepackage{enumitem}
+\usepackage{xcolor}
+
+\usepackage{standalone} % for include other .tex files (figures)
+
+\title{Master's Notes}
+\author{Wellington Vieira M. de Castro }
+%\date{17 de fevereiro de 2021}
+
+\begin{document}
+\maketitle
+
+\begin{displayquote}
+O conhecido é finito, o desconhecido, infinito; intelectualmente estamos numa ilhota no meio de um oceano ilimitado de inexplicabilidade. Nossa função em cada geração é reinvidicar um pouco mais de terra firme.
+\end{displayquote}
+\begin{flushright}
+T. H. Huxley
+\end{flushright}
+
+\color{magenta}
+\section*{TODO}
+\begin{itemize}
+    \item \sout{Put notes in equations}
+    \item Rewrite the probability part in vector form
+    \item Compare the different diff drive models
+    \item Learn and write about the geneal kinematics model based on Twists
+    \item \sout{Write the theory behind Kalman Filters}
+    \item \sout{Organize a Kalman filters taxonomy}
+    \item Write the Robot Model and Measurement Model Jacobians
+\end{itemize}
+\color{black}
+
+\tableofcontents
+
+\section{Introduction}
+\textquote{If you can't explain it simply, you don't understand it well enough.} - Albert Einstein
+
+\subsection{Why Active SLAM ?}
+"We do not just see, we look. And in the course, our pupils adjust to the level of illumination, our eyes bring the world into sharp focus, our eyes converge or diverge, we move our heads or change our position to get a better view of something, and sometimes we even put our spectacles" \cite{bajcsy1988active}. I also say that we walk and explore the world, according to our needs and wills, increasing our knowledge about its structure.
+
+\subsection{Markov Assumption}
+\color{magenta}
+\textbf{TODO}
+\color{black}
+
+\subsection{Linearization and Variance of the Gaussian Distribution}
+\color{magenta}
+\textbf{TODO}
+\color{black}
+
+\section{Mathematics}
+The way that the geometry in this section is addressed was heavily influenced by \cite{lynch2017modern}.
+
+\subsection{Notation to English}
+\subsubsection*{Matrices}
+\begin{table}[h]
+    \centering
+    \begin{tabularx}{\textwidth}{|rX|}
+        \hline
+         $A_{ij}$ & Element of the $\mat{A}$ matrix in the \textit{ith} row and \textit{jth} coloum. \\
+         $\Tr\parentheses{\cdot}$ & Trace operator applied to squared matrices.\\
+         $\mat{I}$ & Identity matrix.  \\
+         $\mat{0}_{m\times n}$ & $m\times n$ null matrix
+         \\ \hline
+    \end{tabularx}
+    \label{tab:my_label}
+\end{table}
+
+\subsubsection*{Vectors}
+\begin{table}[h]
+    \centering
+    \begin{tabularx}{\textwidth}{|rX|}
+        \hline
+         $\bvec{x}$ & Column vector.\\
+         $\bvec{\dot{x}}$ & Derivative of the $\bvec{x}$ vector with respect to time. Newton's derivative notation.\\
+         $\mb{X}$ & Random vector. \\
+         $\mb{x}$ & Random vector realization or observed value. \\
+         $x_{1:n}$ & Generic number sequence. Can be used as a column vector, or a random vector realization, for instance.
+         \\ \hline
+    \end{tabularx}
+\end{table}
+
+\subsubsection*{Probability}
+\begin{table}[h]
+    \centering
+    \begin{tabularx}{\textwidth}{|rX|}
+        \hline
+         $\pr{\cdot}$ &     Probability Density Function (pdf) \\
+         $\expv{\cdot}$ &   Expectation operator \\
+         $\mb{\mu_X}$ &     Expected value, or mean, of the random vector $\mb{X}$ \\
+         $\cov{\cdot}$ &    Covariance of a random variable or vector \\
+         $\mat{K}_{\mb{X}}$ & Covariance matrix of the random vector $\mb{X}$
+         \\ \hline
+    \end{tabularx}
+\end{table}
+
+\subsection{Vocabulary}
+\begin{itemize}
+    \item \textbf{Degrees of Freedom (DoF):} The number of \textbf{degrees of freedom} of a robot is the smallest number real-valued coordinates needed to represent its configuration \cite{lynch2017modern} (pose).
+    \item{\textbf{Configuration space}} The $n$-dimensional space containing all possible configurations of the robot is called the \textbf{configuration space} (\textbf{C-space}). The configuration of a robot is represented by a point in its C-space. \cite{lynch2017modern}
+    \item{\textbf{Free vector:} A \textbf{free vector} is a geometric quantity with a length and a direction. It is called free because it is not necessarily rooted anywhere, e.g. within a coordinate system; only its length and direction matter. A linear velocity can be viewed as a free vector.}
+\end{itemize}
+
+\subsection{Matrices}
+Matrices are the mathematics's soul of this work, they are as fundamental to this work as electricity is to a computer. In this Section, I will try to explain all the useful (for our purposes) tricks regarding matrices. It may have matrix specific subjects in other Sections because, it is hard sometimes, to separate definitions from applications.
+
+\subsubsection{The exponential of a matrix}
+At first glance the expression $e^{\mathbf{A}}$ may seen strange, because most of the times we correlate potentiating to successive multiplications, but how a matrix can dictate how many times we multiply $e$ by itself, like the expression $e^2$, tell us? Well, actually it does not. But if we see this through the Taylor series expansion of $e^x$, Eq. \ref{eq:taylor-e-of-x}, it gets less awkward.
+
+\begin{equation}
+    e^x = \sum_{n = 0}^{\infty}{\frac{x^n}{n!}} = \frac{1}{0!} + \frac{x}{1!} + \frac{x^2}{2!} + \cdots + \frac{x^{n-1}}{(n-1)!} + \frac{x^n}{n!}
+\label{eq:taylor-e-of-x}
+\end{equation}
+
+If we just plug $\mathbf{A}$ in the place of $x$, we have:
+
+\begin{equation}
+    e^\mathbf{A} = \sum_{n=0}^{\infty} {\frac{\mathbf{A}^n}{n!}} = \frac{\cancelto{\mathbf{I}}{\mathbf{A}^0}}{0!} + \frac{\mathbf{A}^1}{1!} + \frac{\mathbf{A}^2}{2!} + \cdots + \frac{\mathbf{A}^{n-1}}{(n-1)!} + \frac{\mathbf{A}^n}{n!}
+\label{eq:taylor-e-of-A}
+\end{equation}
+
+So the mystery is solved! The exponential of a matrix is just a matrix! Well, when you interpret the exponential through the lens of the Taylor series.
+
+\subsubsection{Derivative of $e^{\mathbf{A}t}$}
+We will see that the derivative of $e^{\mathbf{A}t}$, $\mathbf{A} \in \mathbb{R}^{m \times n}$ its very similar to its real counterpart $e^{at}$, $a \in \mathbb{R}$.
+
+\begin{equation}\begin{aligned}
+    \diffp{}{t} \, e^{\mathbf{A}t} &= \diffp{}{t} \left( \sum_{n=0}^{\infty} {\frac{\mathbf{A}^n \, t^n}{n!}} \right) = \diffp{}{t} \left( \mathbf{I} + \frac{\mathbf{A} \, t}{1!} + \frac{\mathbf{A}^2 \, t^2}{2!} + \cdots + \frac{\mathbf{A}^n t^n}{n!} \right)\\
+    &= \cancelto{\mathbf{0}}{\mathbf{I}} + \frac{\mathbf{A} \cdot \cancel{1} \,t^0}{\cancelto{0!}{1!}} + \frac{\mathbf{A}^2 \, \cdot \cancel{2} \, t}{\cancelto{1!}{2!}} + \frac{\mathbf{A}^3 \, \cdot \cancel{3} \, t^2}{\cancelto{2!}{3!}} + \cdots + \frac{\mathbf{A}^n \cdot \cancel{n} \, t^{n-1}}{\cancelto{(n-1)!}{n!}} \\
+    &= \mathbf{A} \underbrace{\left( \mathbf{I} + \frac{\mathbf{A} \, t}{1!} + \frac{\mathbf{A}^2 \, t^2}{2!} + \cdots + \frac{\mathbf{A}^{n-1} t^{n-1}}{(n-1)!} \right)}_{e^{\mathbf{A}t}}\\
+    &= \mathbf{A} \,e^{\mathbf{A}t}
+\end{aligned}
+\label{eq:derivative-matrix-exponential}
+\end{equation}
+
+\subsubsection{Commutativity of $\mathbf{A}$ and $e^{\mathbf{A}t}$}
+This is a straightforward from the development of Eq. \ref{eq:derivative-matrix-exponential}, in the last but one step we could have put $\mathbf{A}$ in evidence in the right side, leading to $e^{\mathbf{A}t}\mathbf{A}$. Therefore:
+
+\begin{equation}
+\mathbf{A} \, e^{\mathbf{A} t} = e^{\mathbf{A} t} \, \mathbf{A} 
+\label{eq:commutativity-exp-of-a-and-a}
+\end{equation}
+
+\subsubsection{Inverse of $e^{\mathbf{A}t}$}
+\color{blue}
+\textbf{OBTER A INVERSA, ACHO QUE É POR LAPLACE}
+\color{black}
+
+\subsubsection{Product of $e^{\mathbf{A}}$ and $e^{\mathbf{B}}$}
+\color{blue}
+\textbf{MOSTRAR QUE NO PRODUTO OS EXPOENTES PODEM SER SOMADOS}
+\color{black}
+
+\subsubsection{Trace}
+The Trace is a operation defined for squared matrices, it is simply the sum of the elements in the main diagonal. It is defined in Eq. \ref{eq:trace-definition}
+\begin{equation}
+    \Tr(\mat{A}) \triangleq \sum\limits_{i} A_{ii}
+    \label{eq:trace-definition}
+\end{equation}
+
+\subsubsection{Matrix with Vector Multiplication}
+Given a $m\times n$ matrix $\mat{A}$, and a $n\times 1$ vector $\bvec{x}$, their multiplication is defined in Eq. \ref{eq:matrix-vector-multiplication}.
+
+\begin{equation}
+    \mat{A} \bvec{x} = \begin{bmatrix}
+        \sum\limits_{j=1}^{n} A_{1j} \,x_j \\
+        \sum\limits_{j=1}^{n} A_{2j} \,x_j \\
+        \vdots \\
+        \sum\limits_{j=1}^{n} A_{mj} \,x_j \\
+    \end{bmatrix}
+    \label{eq:matrix-vector-multiplication}
+\end{equation}
+
+We can also pre-multiply a matrix by a vector transposed vector, let $\bvec{x}$ be a $m\times 1$ vector now.
+
+\begin{equation}
+    \bvecT{x} \mat{A} = \begin{bmatrix}
+        \sum\limits_{i = 1}^{m} A_{i1} \, x_i &
+        \sum\limits_{i = 1}^{m} A_{i2} \, x_i & \dots &
+        \sum\limits_{i = 1}^{m} A_{in} \, x_i
+    \end{bmatrix}
+    \label{eq:vector-matrix-multiplication}
+\end{equation}
+
+\subsubsection{The dot product between vectors}
+Given two $n\times 1$ vectors $\bvec{x}$ and $\bvec{y}$, the dot (or internal) product between then is defined as
+
+\begin{equation}
+    \bvecT{x}\bvec{y} = \Sum{1}{n} x_i\,y_i
+    \label{eq:dot-product}
+\end{equation}
+
+since both the sum and the multiplication are commutative operator, we have that
+
+\begin{equation}
+    \bvecT{x}\bvec{y} = \bvecT{y}\bvec{x}
+\end{equation}
+\subsubsection{Vector and Matrix Differentiation}
+In this Section I will present some matrix expressions differentiation that will help understanding the math used in the techniques presented throughout the text. To build the expressions we will often fall in the following strategy: reduce the formulas to index notation, where we obtain the formula of each scalar in the vector or matrix, then we will derive this scalar with the rules already known from calculus.
+
+\hsix{The Gradient Vector}\\
+When we have a vector $\bvec{x} \in \R^n$ related to a scalar $\alpha \in \R$ trough a function $f: \R^n \to \R$, the derivative of the scalar $\alpha$ in relation to the vector $\bvec{x}$ is the gradient vector $\grad{f}$, defined in Eq. \ref{eq:gradient-definition}.
+
+\renewcommand{\arraystretch}{1.5}
+\begin{equation}
+    \diffp[]{\alpha}{\bvec{x}} = \grad{f} \triangleq \begin{bmatrix}
+        \diffp[]{f(\bvec{x})}{x_1} \\
+        \diffp[]{f(\bvec{x})}{x_2} \\
+        \vdots \\
+        \diffp[]{f(\bvec{x})}{x_n} \\
+    \end{bmatrix}, \text{if $\alpha = f(\bvec{x})$}
+    \label{eq:gradient-definition}
+\end{equation}
+\renewcommand{\arraystretch}{1.0}
+
+\hsix{The Gradient Matrix}\\
+Whereas the Gradient Vector is the derivative of a scalar with respect to a vector's components, the Gradient Matrix is the derivative of a scalar with respect each element of a matrix $\mat{A} \in \R^{m\times n}$. Let $f: \R^{m \times n} \to \R$, the derivative of $f$ with respect to the $\mat{A}$ matrix is defined in Eq. \ref{eq:gradient-matrix-definition}.
+
+\renewcommand{\arraystretch}{1.5}
+\begin{equation}
+    \diffp[]{f}{\mat{A}} \triangleq \begin{bmatrix}
+        \diffp[]{f}{A_{11}} & \diffp[]{f}{A_{12}} & \cdots & \diffp[]{f}{A_{1n}} \\
+        \diffp[]{f}{A_{21}} & \diffp[]{f}{A_{22}} & \cdots & \diffp[]{f}{A_{2n}} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \diffp[]{f}{A_{m1}} & \diffp[]{f}{A_{m2}} & \cdots & \diffp[]{f}{A_{mn}}
+    \end{bmatrix}
+    \label{eq:gradient-matrix-definition}
+\end{equation}
+\renewcommand{\arraystretch}{1.0}
+
+The gradient matrix has the same number of rows and columns as $\mat{A}$ matrix.
+
+\hsix{The Jacobian Matrix}\\
+Whenever we have a vector $\bvec{x} \in\R^n$ related to another vector $\bvec{y} \in\R^m$ trough some function $\boldsymbol{g}:\R^n\to\R^m$, the derivative of $\bvec{y}$ with respect to $\bvec{x}$ is the Jacobian matrix $\mat{J}(\bvec{x}) \in\R^{m\times n}$. Let
+\begin{equation*}
+    \begin{bmatrix}
+        y_1 \\ y_2 \\ \vdots \\ y_m
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        g_1(\bvec{x}) \\ g_2(\bvec{x}) \\ \vdots \\ g_m(\bvec{x})
+    \end{bmatrix}
+\end{equation*}
+we have that
+\renewcommand{\arraystretch}{1.5}
+\begin{equation}
+    \diffp[]{\bvec{y}}{\bvec{x}} = \mat{J}(\bvec{x}) \triangleq \begin{bmatrix}
+        \diffp[]{y_1}{x_1} & \diffp[]{y_1}{x_2} & \dots & \diffp[]{y_1}{x_n} \\
+        \diffp[]{y_2}{x_1} & \diffp[]{y_2}{x_2} & \dots & \diffp[]{y_2}{x_n} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \diffp[]{y_m}{x_1} & \diffp[]{y_m}{x_2} & \dots & \diffp[]{y_m}{x_n} \\
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        \diffp[]{g_1(\bvec{x})}{x_1} & \diffp[]{g_1(\bvec{x})}{x_2} & \dots & \diffp[]{g_1(\bvec{x})}{x_n} \\
+        \diffp[]{g_2(\bvec{x})}{x_1} & \diffp[]{g_2(\bvec{x})}{x_2} & \dots & \diffp[]{g_2(\bvec{x})}{x_n} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \diffp[]{g_m(\bvec{x})}{x_1} & \diffp[]{g_m(\bvec{x})}{x_2} & \dots & \diffp[]{g_m(\bvec{x})}{x_n} \\
+    \end{bmatrix}
+\label{eq:jacobian-matrix}
+\end{equation}
+\renewcommand{\arraystretch}{1.0}
+The above expression is the Jacobian matrix of $\bvec{y}$ with respect to $\bvec{x}$.
+
+\hsix{Derivative of $\bvec{y} = \mat{A}\bvec{x}$ With Respect to $\bvec{x}$}\\
+Let
+\begin{equation*}
+   \bvec{y} = \mat{A} \bvec{x}, \text{with $\mat{A} \in \R^{m\times n}$ and $\bvec{x} \in \R^n $}
+\end{equation*}
+as can be seen in Eq. \ref{eq:matrix-vector-multiplication} the \textit{ith} element of the $\bvec{y}$ vector is given by
+\begin{equation*}
+    y_i = \Sum[j]{1}{n} A_{ij}x_j = A_{i1}x_1 + A_{i2}x_2 + \dots + A_{in}x_n
+\end{equation*}
+so we have that
+\begin{equation*}
+    \diffp[]{y_i}{x_k} = A_{ik}, \text{for $i = 1, 2, \dots m$  and $k = 1, 2, \dots, n$}
+\end{equation*}
+therefore we have that the Jacobian of the vector $\bvec{y}$ in relation with the vector $\bvec{x}$ is the matrix $\mat{A}$.
+\begin{equation}
+    \diffp[]{\bvec{y}}{\bvec{x}} = \mat{A}, \text{if $\bvec{y} = \mat{A}\bvec{x}$}
+    \label{eq:dydy_in_matrix_form}
+\end{equation}
+
+\hsix{Derivative of $\alpha = \bvecT{x}\mat{A}\bvec{x}$}\\
+It is very common to differentiate the scalar $\alpha$ obtained by the product $\bvecT{x}\mat{A}\bvec{x}$, with respect to the vector $\bvec{x}$, for this first I will rewrite $\alpha$:
+
+\begin{equation}
+    \begin{aligned}
+        \alpha &= \blue{\bvecT{x}\mat{A}}\bvec{x}\\
+        &= \blue{\begin{bmatrix}
+        \sum\limits_{i = 1}^{n} A_{i1} \, x_i &
+        \sum\limits_{i = 1}^{n} A_{i2} \, x_i & \dots &
+        \sum\limits_{i = 1}^{n} A_{in} \, x_i
+    \end{bmatrix}} \bvec{x} && \text{\small Applied Eq. \ref{eq:vector-matrix-multiplication}} \\
+    &= \magenta{\begin{bmatrix}
+        \sum\limits_{i = 1}^{n} A_{i1} \, x_i &
+        \sum\limits_{i = 1}^{n} A_{i2} \, x_i & \dots &
+        \sum\limits_{i = 1}^{n} A_{in} \, x_i
+    \end{bmatrix}\bvec{x}} \\
+    &= \magenta{\Sum[j]{1}{n} 
+        \parentheses{\sum\limits_{i = 1}^{n} A_{ij} \, x_i}
+    x_j} && \text{\small Applied Eq. \ref{eq:dot-product}} \\
+    &= \Sum[j]{1}{n} 
+        \sum\limits_{i = 1}^{n} A_{ij} \, x_i x_j
+    \end{aligned}
+\end{equation}
+
+To derive $\alpha$ with respect to the \textit{kth} component of the $\bvec{x}$ vector, we have to derive the portion obtained when the \textit{kth} component is present because of the left summation and when it is present because of the right summation:
+\begin{equation}
+\begin{aligned}
+    \diffp[]{\alpha}{x_k} &= \diffp[]{}{x_k} \parentheses{\Sum{1}{n} A_{ik}x_i x_k + \Sum[j]{1}{n} A_{kj}x_k x_j} \\
+    &= \Sum{1}{n} A_{ik}x_i \blue{\diffp[]{x_k}{x_k}} + \Sum[j]{1}{n} A_{kj}\magenta{\diffp[]{x_k}{x_k}} x_j\\
+    &= \Sum{1}{n} A_{ik}x_i \blue{1} + \Sum[j]{1}{n} A_{kj}\magenta{1} x_j\\
+    &= \Sum{1}{n} A_{ik}x_i + \Sum[j]{1}{n} A_{kj} x_j\\
+\end{aligned}
+\label{}
+\end{equation}
+for all components we have the following gradient vector
+\begin{equation}
+    \diffp[]{\alpha}{\bvec{x}} = \bvecT{x}\mat{A} + \bvecT{x}\matT{A} = \bvecT{x} \parentheses{\mat{A} + \matT{A}}
+\end{equation}
+
+\hsix{Matrix Product Derivative With Respect to Scalar} \\
+Let $\mat{A} \in \R^{m\times n}$ and $\mat{B} \in \R^{n\times p}$ be matrices whose elements $A_{ij}(x)$ and $B_{ij}(x)$, respectively, are functions of a scalar $x$. We have that the \textit{ij} element of the product between the two, $\brac{\mat{A B}}_{ij}$, is
+\begin{equation*}
+    \brac{\mat{A B}}_{ij} = \Sum[k]{1}{n} A_{ik}(x) B_{kj}(x)
+\end{equation*}
+and its derivative with respect to $x$ can be written in terms of the product derivative rule, as following
+\begin{equation*}
+\begin{aligned}
+    \diffp[]{}{x} \brac{\mat{A B}}_{ij} &= \diffp[]{}{x} \Sum[k]{1}{n} A_{ik}(x) B_{kj}(x) \\
+    &= \Sum[k]{1}{n} \diffp[]{}{x} \parentheses{A_{ik}(x) B_{kj}(x)} \\
+    &= \Sum[k]{1}{n} \underbrace{\parentheses{\diffp[]{}{x}A_{ik}(x)}}_{A'_{ik}(x)} B_{kj}(x) + A_{ik}(x) \underbrace{\parentheses{\diffp[]{}{x} B_{kj}(x)}}_{B'_{kj}(x)} & \text{\small \blue{Applied Product Derivative Rule}} \\
+    &= \magenta{\Sum[k]{1}{n} A'_{ik}(x) B_{kj}(x)} + 
+    \blue{\Sum[k]{1}{n} A_{ik}(x) B'_{kj}(x)}\\
+    &= \magenta{\brac{\parentheses{\diffp[]{}{x}\mat{A}} \mat{B}}_{ij}} + \blue{\brac{\mat{A} \parentheses{\diffp[]{}{x} \mat{B}}}_{ij}}
+\end{aligned}
+\end{equation*}
+so according to the above, we can get the matrix product derivative with respect to a scalar $x$, as
+\begin{equation}
+    \diffp[]{}{x}\parentheses{\mat{A B}} = \parentheses{\diffp[]{}{x} \mat{A}} \mat{B} + \mat{A} \parentheses{\diffp[]{}{x} \mat{B}}
+    \label{eq:matrix-prod-derivative-with-respect-to-scalar}
+\end{equation}
+which resembles a lot the product derivative rule for scalar functions.
+
+\hsix{Chain Rule in Linear Expressions}\\
+\magenta{\textbf{TODO}}
+
+\hsix{Trace Derivative With Respect to Matrix}\\
+Here I will show a property about trace derivative with respect to a matrix, followed by some examples that cover all the math, regarding to trace differentiation, needed to derive the SLAM algorithms used.
+
+
+\hsix{Trace Derivative Linearity} \\
+Let $\mat{A}(x)$ be a matrix dependent of the scalar $x$. I want to show that
+\begin{equation*}
+    \diffp[]{}{x}\Tr(\mat{A}(x)) = \Tr\parentheses{\diffp[]{}{x}\mat{A}(x)}
+\end{equation*}
+for this we have that
+\begin{equation}
+\begin{aligned}
+    \diffp[]{}{x}\Tr(\mat{A}(x)) &= \diffp[]{}{x} \Sum{1}{n} A_{ii}(x)\\
+    &= \Sum{1}{n} \diffp[]{}{x} A_{ii}(x) & \text{\small \blue{Applied the $\diffp[]{}{x}$ operator linearity property.}}
+\end{aligned}
+\label{eq:trace-proof-1}
+\end{equation}
+on the other rand we have that
+\renewcommand{\arraystretch}{1.5}
+\begin{equation*}
+    \magenta{\diffp[]{}{x} \mat{A}(x)} = \begin{bmatrix}
+        \diffp[]{}{x}A_{11}(x) & \diffp[]{}{x} A_{12}(x) & \cdots & \diffp[]{}{x} A_{1n}(x) \\
+        \diffp[]{}{x}A_{21}(x) & \diffp[]{}{x} A_{22}(x) & \cdots & \diffp[]{}{x} A_{2n}(x) \\
+        \vdots & \vdots & \ddots & \vdots \\
+        \diffp[]{}{x}A_{n1}(x) & \diffp[]{}{x} A_{n2}(x) & \cdots & \diffp[]{}{x} A_{nn}(x) \\
+    \end{bmatrix}   
+\end{equation*}
+\renewcommand{\arraystretch}{1}
+then
+\begin{equation}
+\begin{aligned}
+    \Tr\parentheses{\magenta{\diffp[]{}{x}\mat{A}(x)}} &= \diffp[]{}{x}A_{11}(x) + \diffp[]{}{x}A_{22}(x) + \dots + \diffp[]{}{x}A_{nn}(x)\\
+    &= \Sum{1}{n} \diffp[]{}{x} A_{ii}(x)
+\end{aligned}
+\label{eq:trace-proof-2}
+\end{equation}
+since Equations \ref{eq:trace-proof-1} and \ref{eq:trace-proof-2} evaluate to the same expression, Eq. \ref{eq:trace-derivative-linearity}.
+\begin{equation}
+    \diffp[]{}{x}\Tr(\mat{A}(x)) = \Tr\parentheses{\diffp[]{}{x}\mat{A}(x)}
+    \label{eq:trace-derivative-linearity}
+\end{equation}
+
+
+\hsix{Useful Trace Derivatives Examples}
+\begin{enumerate}
+    \item Derivative of $\Tr(\mat{AXB})$ with respect to $\mat{X}$\\
+    Let's say that $\mat{AXB} \in \R^{m \times m}$, that is: $\mat{A} \in \R^{m\times n}$, $\mat{X} \in \R^{n\times p}$, and $\mat{B} \in \R^{p\times m}$. First of all, I will rewrite the $\Tr(\mat{AXB})$ in index notation:
+    \begin{equation*}
+        \begin{aligned}
+            \Tr(\mat{AXB}) &= \Sum{1}{m} \brac{\mat{AXB}}_{ii}\\
+            &= \Sum{1}{m}\Sum[j]{1}{n} A_{ij} \blue{\brac{\mat{XB}}_{ji}}\\
+            &= \Sum{1}{m}\Sum[j]{1}{n} A_{ij} \blue{\Sum[k]{1}{p} X_{jk} B_{ki}}\\
+            &= \Sum{1}{m}\Sum[j]{1}{n}\Sum[k]{1}{p} A_{ij} X_{jk} B_{ki}\\
+        \end{aligned}
+    \end{equation*}
+    The derivative of $\Tr(\mat{AXB})$ with respect to a particular element $X_{jk}$ is given by
+    \begin{equation}
+        \diffp[]{}{X_{jk}} \Tr(\mat{AXB}) = \Sum{1}{n} A_{ij} B_{ki} = \brac{\mat{B A}}_{kj}
+        \label{eq:trace-axb-derivative-with-respect-to-scalar}
+    \end{equation}
+    from the above expression, we have that the derivative of this trace with respect to the $\mat{X}$ matrix is
+    \begin{equation*}
+        \diffp[]{}{\mat{X}} \Tr(\mat{AXB}) = \mat{B A}
+    \end{equation*}
+    but, $\mat{B A} \in \R^{p\times n}$ and as stated by Eq. \ref{eq:gradient-matrix-definition} the Gradient Matrix must have the same dimension as the matrix whom the expression is derived with respect to, since $\mat{X} \in \R^{n\times p}$, we just need to transpose the product $\mat{BA}$ to get the dimension right. Equation \ref{eq:trace-axb-derivate} gives this trace's derivative with respect to the $\mat{X}$ matrix.
+    \begin{equation}
+    \begin{aligned}
+        \diffp[]{}{\mat{X}} \Tr(\mat{AXB}) &= \mat{(B A)^T}\\
+        &= \mat{A^T B^T}
+    \end{aligned}
+    \label{eq:trace-axb-derivate}
+    \end{equation}
+    
+    \item Derivative of $\Tr\parentheses{\mat{A X^T B}}$ with respect to $\mat{X}$\\
+    Let's define $\mat{A} \in \R^{m\times n}$, $\mat{X} \in \R^{p\times n}$ and $\mat{B} \in \R^{p\times m}$. Using the index notation as in the previous example, we have that:
+    \begin{equation*}
+        \Tr\parentheses{\mat{A X^T B}} = \Sum{1}{m}\Sum[j]{1}{n}\Sum[k]{1}{p} A_{ij} X_{kj} B_{ki}
+    \end{equation*}
+    The derivative of $\Tr\parentheses{\mat{AX^TB}}$ with respect to a particular $X_{kj}$ is given by
+    \begin{equation}
+        \diffp[]{}{X_{kj}} \Tr\parentheses{\mat{AX^TB}} = \Sum{1}{m} A_{ij} B_{ki} = \brac{\mat{B A}}_{kj}
+        \label{eq:trace-ax^tb-derivative-with-respect-to-scalar}
+    \end{equation}
+    therefore,
+    \begin{equation}
+        \diffp[]{}{\mat{X}} \Tr\parentheses{\mat{AX^TB}} = \mat{B A}
+        \label{eq:trace-ax^tb-derivative}
+    \end{equation}
+    which is in agreement with the dimensions of $\mat{X}$, so satisfies the Gradient Matrix dimension rule.
+    \item Derivative of $\Tr\parentheses{\mat{X A X^T}}$ with respect to $\mat{X}$\\
+    Instead of rewriting $\Tr\parentheses{\mat{X A X^T}}$ in index notation and deriving with respect to a $X_{jk}$ element, I will calculate this result using the Trace Derivative Linearity property (Eq. \ref{eq:trace-derivative-linearity}), the Matrix Product Derivative Rule (Eq. \ref{eq:matrix-prod-derivative-with-respect-to-scalar}) and, the previous two examples.
+    First lets apply the the two properties aforementioned:
+    \begin{equation*}
+        \begin{aligned}
+            \diffp[]{}{X_{jk}} \Tr\parentheses{\mat{X A X^T}} &= \Tr\parentheses{\diffp[]{}{X_{jk}} \parentheses{\mat{X A X^T}}} & \text{\small Applied Eq. \ref{eq:trace-derivative-linearity}}\\
+            &= \Tr\parentheses{\parentheses{\diffp[]{}{X_{jk}} \mat{X}} \mat{A X^T} + \mat{X}\parentheses{\diffp[]{}{X_{jk}} \mat{A X^T}}} & \text{\small Appled Eq. \ref{eq:matrix-prod-derivative-with-respect-to-scalar}}\\
+            &= \Tr\parentheses{\parentheses{\diffp[]{}{X_{jk}} \mat{X}} \mat{A X^T}} + \Tr\parentheses{\mat{X}\magenta{\parentheses{\diffp[]{}{X_{jk}}} \mat{A X^T}}}\\
+            &= \Tr\parentheses{\parentheses{\diffp[]{}{X_{jk}} \mat{X}} \underbrace{\mat{A X^T}}_{\mat{B}}} + \Tr\parentheses{\underbrace{\mat{X \magenta{A}}}_{\mat{C}}\magenta{\parentheses{\diffp[]{}{X_{jk}} \mat{X^T}}}}\\
+        \end{aligned}
+    \end{equation*}
+    by Eq. \ref{eq:trace-derivative-linearity} we can move the derivative operator out of the trace
+    \begin{equation*}
+        \diffp[]{}{X_{jk}} \Tr\parentheses{\mat{X A X^T}} = \diffp[]{}{X_{jk}} \Tr\parentheses{\mat{X B}} + \diffp[]{}{X_{jk}}\Tr\parentheses{\mat{C X^T}}
+    \end{equation*}
+    finally we can apply the results in Equations \ref{eq:trace-ax^tb-derivative-with-respect-to-scalar} and \ref{eq:trace-ax^tb-derivative-with-respect-to-scalar}
+    \begin{equation*}
+        \begin{aligned}
+        \diffp[]{}{X_{jk}} \Tr\parentheses{\mat{X A X^T}} &= \diffp[]{}{X_{jk}} \Tr\parentheses{\mat{\blue{I} X B}} + \diffp[]{}{X_{jk}}\Tr\parentheses{\mat{C X^T \magenta{I}}} \\
+        &= \brac{\mat{B\,I}}_{kj} + \brac{\mat{I\,C}}_{kj}
+        \end{aligned}
+    \end{equation*}
+    the identity matrices were inserted above just for the expression to look in the same format as in the results we have used. Therefore, as before, we can write
+    \begin{equation*}
+        \diffp[]{}{\mat{X}} \Tr\parentheses{\mat{X A X^T}} = \mat{I^T \, B^T} + \mat{I\, C}
+    \end{equation*}
+    remembering that $\mat{B} = \mat{A\,X^T}$ and $\mat{C} = \mat{X \, A}$, we have that
+    \begin{equation}
+        \diffp[]{}{\mat{X}} \Tr\parentheses{\mat{X A X^T}} = \mat{X A^T} + \mat{X A}
+        \label{eq:trace-xax^t-derivative}
+    \end{equation}
+\end{enumerate}
+
+
+\subsection{State Space representation of Dynamic Systems}
+There are two main ways of describe behaviour of a physical system: Dynamic and Kinematic models. A Dynamic Model models the system behaviour through the interaction of forces and torques. Whereas the Kinematic Model explains the system's behaviour through velocities, which are, often, the derivative the system's elements position.
+
+To represent a kinematic model, we apply the use of state spaces notation. In a linear state space, the system's velocities is a linear function of the system state and the control input. The $\bvec{x}$ is commonly used to represent the vector state, with component $\cbrac{x_1, x_2, \dots, x_n}$, and $\bvec{u}$ is used to represent the control vector, with components $\cbrac{u_1, u_2, \dots, u_m}$. Equation \ref{eq:linear-state-space} is a general representation of a continuous linear time-variant system in the state space. The fact that the vectors $\bvec{x}$, $\bvec{u}$ and $\bvec{y}$ are functions of time is implicit.
+
+\begin{equation}
+    \begin{aligned}
+        \bvec{\dot{x}} &= \mat{A_t} \bvec{x} + \mat{B_t} \bvec{u} \\
+        \bvec{y} &= \mat{C_t} \bvec{x} + \mat{D_t} \bvec{u}
+    \end{aligned}
+    \label{eq:linear-state-space}
+\end{equation}
+\noindent where
+\begin{description}[labelindent=10pt, labelsep=10pt]
+    \item[$\bvec{x}$] is the system's state vector
+    \item[$\mat{A_t}$] is named state matrix
+    \item[$\mat{B_t}$] is the input or control matrix
+    \item[$\bvec{y}$] is the output vector
+    \item[$\mat{C_t}$] is the output matrix
+    \item[$\mat{D_t}$] is the feedforward matrix. Always $\mat{0}$ for physical systems.
+\end{description}
+
+In Equation \ref{eq:linear-state-space} all the matrices has a sub index $\mathbf{t}$, the sub index is used to show that they can vary in time. Systems where the system, input, output and feedforward matrices do not vary in time are called time-invariant. Equation \ref{eq:linear-time-invariant-state-space} is a state space of a continuous linear time-invariant system.
+
+\begin{equation}
+    \begin{aligned}
+        \bvec{\dot{x}} &= \mat{A} \bvec{x} + \mat{B} \bvec{u} \\
+        \bvec{y} &= \mat{C} \bvec{x} + \mat{D} \bvec{u}
+    \end{aligned}
+    \label{eq:linear-time-invariant-state-space}
+\end{equation}
+
+One can say that the state space representation for linear systems is useless, since real-life systems are usually non-linear or are linear just inside an operation zone. Well, this is true. But, quoting Richard Feynman \textquote{Linear systems are important because we can solve them}, what we usually do is linearize the non-linear systems so that we can work with them, therefore, linear state space representation is not useless.
+
+State space is used to represent linear discrete systems, too. The notation is slightly different, and opposite to the continuous case, the state vector derivative with respect to time is not used. In the discrete case, the next state is a linear function of the current state and the current control input. Equation \ref{eq:discrete-linear-state-space} is the representation of a discrete linear time-variant system.
+
+\begin{equation}
+    \begin{aligned}
+        \bvec{x_{k}} &= \mat{A_k} \bvec{x_{k-1}} + \mat{B_k} \bvec{u_k} \\
+        \bvec{y_k} &= \mat{C_k} \bvec{x_k} + \mat{D_k} \bvec{u_k}
+    \end{aligned}
+    \label{eq:discrete-linear-state-space}
+\end{equation}
+
+The sub index $\mathbf{k}$ is used with discrete systems, as in the continuous case, the system can be also time-invariant, that is, the system's matrices do not depend of the time step. Equation \ref{eq:discrete-linear-time-invariant-state-space} is a representation of a discrete linear time-invariant system.
+
+\begin{equation}
+    \begin{aligned}
+        \bvec{x_{k}} &= \mat{A} \bvec{x_{k-1}} + \mat{B} \bvec{u_k} \\
+        \bvec{y_k} &= \mat{C} \bvec{x_k} + \mat{D} \bvec{u_k}
+    \end{aligned}
+    \label{eq:discrete-linear-time-invariant-state-space}
+\end{equation}
+
+Here we will work with discrete time-variant linear systems, since we are using computers to control our robot models.
+
+\subsection{Probability}
+Probability is a branch of mathematics used whenever uncertainty appears in a problem. As robots leave the well controlled and highly predictable assembly lines and enter in the real (open) world, a lot of uncertainty arises. It is impossible to pre-built a map for every scenario a vacuum cleaner robot will encounter while cleaning an endless variety of houses, or model every response of the Perseverance Rover in the \textit{random} Mars environment.
+
+Sebastian Thrun in \cite{thrun2000probabilistic} conjectures that "A robot that carries a notion of its own uncertainty and that acts accordingly, will do better than one that does not.", being a little socratic I would say that a robot aware of its own ignorance, is far more \textit{wise} than a robot that does not. So, is more than natural that we incorporate probability in our robotics algorithms, this way they can have knowledge about their own ignorance about where they \textit{think} they are, and how they \textit{think} the world looks like.
+
+The reader must encounter a lot of names/concepts as: random variable, expected value, variance, probability density function, and others. In this chapter, I will give a very informal introduction about then, just the necessary minimum to our purposes.
+
+\subsubsection{Probability density function}
+\magenta{\textbf{caracterizar uma funcao densidade de probabilidade}}
+
+\subsubsection{Random Variable Independence}
+We say that two random variables are statistically independent if and only if Equation \ref{eq:rv-independence} holds true.
+\begin{equation}
+    \pr{\mb{x}, \mb{y}} = \pr{\mb{x}}\pr{\mb{y}}
+    \label{eq:rv-independence}
+\end{equation}
+
+\subsubsection{Expected value (mean)}
+Given the probability density $\pr{\mb{x}}$ function of the continuous random vector $\mb{X}$, the expected value $\expv{\mb{X}}$ is the integral in Eq. \ref{eq:expected-value}.
+
+\begin{equation}
+    \expv{\mb{X}} = \mb{\mu_X} = \Int[\mb{x}]{-\infty}{\infty}{\mb{x} \, \pr{\mb{x}}}
+    \label{eq:expected-value}
+\end{equation}
+
+Often $\mathbb{E}$ is referred as the expectation operator. $\expv{\mb{X}}$ is also known as the first moment of the random vector $\mb{X}$.
+
+\subsubsection{Random Variable Variance}
+The variance of a random variable measures the sparseness of the random variable realizations around the mean, and is given by Eq. \ref{eq:variance}. The variance is also represented by the $\sigma_X^2$ symbol.
+
+\begin{equation}
+    \mathop{Var}(X) = \mathbb{E}\left[ (X - \mu_X)^2 \right] = \int_{-\infty}^{\infty} (x - \mu_X)^2 \, p(x) \, dx
+    \label{eq:variance}
+\end{equation}
+
+The expectation operator is defined in terms of a integral, so it is natural that the expectation operator inherit the algebraic properties of integrals. So working with Eq. \ref{eq:variance} let us write the variance of a random variable in a different, and sometimes more convenient, way:
+
+\begin{equation}
+\begin{aligned}
+    \mathbb{E}\left[(X-\mu)^2\right] &= \expv{ X^2 -2\mu_X X + \mu_X^2} \\
+    &= \expv{X^2} - 2\mu_X \underbrace{\expv{X}}_{\mu_X} + \mu_X^2 \\
+    &= \expv{X^2} - \mu_X^2 \\
+\end{aligned}
+\label{eq:variance-other-form}
+\end{equation}
+
+Equation \ref{eq:variance-other-form} shows that the variance of a random variable is its second moment minus the first squared.
+
+\subsubsection{The Univariate Gaussian Distribution (Normal Distribution)}
+The Gaussian Distribution, also known as the Normal Distribution, is a probability density function that can be fully characterized by its first and second moments only. The single-variable Gaussian distribution is given by Eq. \ref{eq:single-variable-gaussian-distribution}
+
+\begin{equation}
+    p(x) = \frac{1}{\sqrt{2\pi\sigma_X^2}} \, \exp{\left(-\dfrac{(x-\mu_X)^2}{2\sigma_X^2}\right)}
+    \label{eq:single-variable-gaussian-distribution}
+\end{equation}
+
+Another way to refer to a Gaussian is by bell curve, the reason is easily seen in Fig. \ref{fig:guassian-curve}. By the way, the area under the curve, between$\left[\mu-\sigma, \mu+\sigma\right]$, corresponds to about $68\%$ of the total area.
+
+\begin{figure}[h]
+    \centering
+    \input{figs/gaussian}
+    \caption{Gaussian distribution with the area under the curve between $-\sigma$ and $+\sigma$ around the mean highlighted.}
+    \label{fig:guassian-curve}
+\end{figure}
+
+The Gaussian distribution is, by far, the most important and used distribution in this work. Usually it is used to model noise of different natures: control, model and measurement. One could argue that model all noises as Gaussian is a mistake, but the central limit theorem of probability theory states that when independent random variables are added, the resultant distribution tends towards a normal distribution.
+
+\color{magenta}
+\textbf{TODO: USAR O MAYBECK PARA JUSTIFICAR ISSO AQUI. RUÍDO \\BRANCO E TAL.}
+\color{black}
+
+\subsubsection{Random Variable Covariance}
+The covariance between two random variable $X_1$ and $X_2$, $\cov{X_1, X_2}$ or $K_{X_1, X_2}$, is given by the Expectation in Eq. \ref{eq:random-variable-covariance}.
+\begin{equation}
+    K_{X_1, X_2} = \expv{(X_1 - \mu_{X_1})(X_2 - \mu_{X_2})}
+    \label{eq:random-variable-covariance}
+\end{equation}
+We can expand the above expression in:
+\begin{equation}
+\begin{aligned}
+    K_{X_1, X_2} &= \expv{X_1 X_2} - \blue{\expv{X_1}\mu_{X_2}} - \magenta{\mu_{X_1}\expv{X_2}} + \mu_{X_1} \mu_{X_2}\\
+    &= \expv{X_1 X_2} - \blue{\mu_{X_1}}\mu_{X_2} - \cancel{\mu_{X_1}\magenta{\mu_{X_2}}} + \cancel{\mu_{X_1} \mu_{X_2}}\\
+    &= \expv{X_1 X_2} - \mu_{X_1}\mu_{X_2}
+\end{aligned}
+    \label{eq:random-variable-covariance-expanded}
+\end{equation}
+
+\subsubsection{Random Vector Covariance}
+Covariance is the equivalent for random vectors of the variance for random variables. The covariance, $\cov{\mb{X}}$ or $\mat{K}_{\mb{X}}$, of the random vectors $\mb{X} \in \R^n$ is given by
+\begin{equation}
+    \begin{aligned}
+        \cov{\mb{X}} &= \expv{(\mb{X} - \mb{\mu_X}) (\mb{X} - \mb{\mu_X})^\mathbf{T}} \\
+        &= \expv{\mb{X}\mb{X}^\mathbf{T} - \mb{X}\mb{\mu_X}^\mathbf{T} - \mb{\mu_X}\mb{X}^{\mathbf{T}} + \mb{\mu_X} \mb{\mu_X}^\mathbf{T}} \\
+        &= \expv{\mb{X}\mb{X}^\mathbf{T}} - \magenta{\expv{\mb{X}}\mb{\mu_X}^\mathbf{T}} - \magenta{\mb{\mu_X}\expv{\mb{X}^{\mathbf{T}}}} + \mb{\mu_X} \mb{\mu_X}^\mathbf{T}\\
+        &= \expv{\mb{X}\mb{X}^\mathbf{T}} - \magenta{2 \mb{\mu_X} \mb{\mu_X}^\mathbf{T}} + \mb{\mu_X} \mb{\mu_X}^\mathbf{T}\\
+        &= \expv{\mb{X}\mb{X}^\mathbf{T}} - \mb{\mu_X} \mb{\mu_X}^\mathbf{T}
+    \end{aligned}
+    \label{eq:random-vec-cov}
+\end{equation}
+Equation \ref{eq:random-vec-cov} results in what is called the Covariance Matrix, shown in Eq. \ref{eq:covariance-matrix}. Covariance Matrices are always symmetric.
+
+\begin{equation}
+    \cov{\mb{X}} = \mat{K}_{\mb{X}} = \begin{bmatrix}
+        \sigma^2_{X_1} & K_{X_1, X_2} & \cdots & K_{X_1, X_n} \\
+        K_{X_2, X_1} & \sigma^2_{X_2} & \cdots & K_{X_2, X_n} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        K_{X_n, X_1} & K_{X_n, X_2} & \cdots & \sigma_{X_n}^2
+    \end{bmatrix}
+    \label{eq:covariance-matrix}
+\end{equation}
+
+\subsubsection{The Multivariate Gaussian Distribution}
+\magenta{\textbf{TODO}}
+
+\subsubsection{Random Variable Correlation} 
+The correlation, $\mathop{Corr}(X_1, X_2)$ or $R_{X_1, X_2}$, between two random variables is given by the expectation of the product of the two random variables
+\begin{equation}
+    R_{X_1, X_2} = \expv{X_1 X_2} 
+    \label{eq:correlation}
+\end{equation}
+when we say that two random variables $X_1$ and $X_2$ are uncorrelated, this means that
+\begin{equation*}
+    \expv{X_1 X_2} = \mu_{X_1} \mu_{X_2}
+\end{equation*}
+observing Eq. \ref{eq:random-variable-covariance-expanded} we also have that
+\begin{equation*}
+    \cov{X_1, X_2} = K_{X_1, X_2} = 0
+\end{equation*}
+when the two random variables are uncorrelated.
+
+\subsubsection{Conditional probability}
+In this Section I remember the conditional probability definition and write it to an arbitrary number of variables.
+
+I suppose you are already familiar with the definition of conditional probability in Eq. \ref{eq:conditional-probability}
+\begin{equation}
+    p(x_1 \given x_2) = \dfrac{p(x_1, x_2)}{p(x_2)}    
+    \label{eq:conditional-probability}
+\end{equation}
+it can be written as in Eq. \ref{eq:joint-from-conditional-probability} also.
+\begin{equation}
+    p(x_1, x_2) = p(x_1 \given x_2) \, p(x_2)
+    \label{eq:joint-from-conditional-probability}
+\end{equation}
+both can be rewritten to an arbitrary number of variables. Since I found it difficult to figure it out at first, they are shown below.
+
+Equation \ref{eq:conditional-probability-generalized} is the generalization of the expression in Eq. \ref{eq:conditional-probability}
+\begin{equation}
+    p(x_1, x_2, \dots x_i, \given x_{i+1}, x_{i+2}, \dots, x_n) = \dfrac{p(x_1, x_2, \dots x_i, x_{i+1}, x_{i+2}, \dots, x_n)}{p(x_{i+1}, x_{i+2}, \dots, x_n)}
+    \label{eq:conditional-probability-generalized}
+\end{equation}
+the generalization of Eq. \ref{eq:joint-from-conditional-probability} is called \textit{chain rule} or \textit{general product rule}, it is obtained by applying the conditional probability definition, in the remaining joint probability density function (\textit{pdf}) recursively, until marginal \textit{pdf} shows up. The generalization is in Eq. \ref{eq:probability-chain-rule}
+\begin{equation}
+    \begin{aligned}
+        \pr{x_1, x_2, \dots, x_n} &= \pr{x_1 \given x_2, x_3, \dots, x_n} \, \blue{ \pr{x_2, x_3, \dots, x_n} } \\
+        &= \pr{x_1 \given x_2, x_3, \dots, x_n} \, \blue{ \pr{x_2 \given x_3, x_4, \dots, x_n} \pr{x_3, x_4, \dots, x_n}} \\
+        &\vdots\\
+        &= \pr{x_1 \given x_2, x_3, \dots, x_n} \, \pr{x_2 \given x_3, x_4, \dots, x_n} \, \cdots \, \pr{x_n} \\
+        &= \left(\prod_{i = 1}^{n-1} \pr{x_i | x_{i+1}, \dots, x_{n}} \right) \pr{x_n}
+    \end{aligned}
+    \label{eq:probability-chain-rule}
+\end{equation}
+there is a intuitive saying that helps me understand the chain rule ``the probability of observing events E \textbf{and} F is the probability of observing F, multiplied by the probability of observing E, given that you observed F''.
+
+\subsubsection{Manipulation of conditional probabilities}
+First, I will introduce some notation that will make the formulas less cluttered. Let $x_{i:n}$ be the sequence, or vector $\{ x_{i}, x_{i+1}, \dots, x_{i+j}, \dots, x_n\}$. And $x_{i:n \setminus j}$ be the same vector, but without the \textit{jth} element, that is $x_{i:n \setminus j} = \{x_i, x_{i+1}, \dots, x_{i+j-1}, x_{i+j+1}, \dots, x_n\}$. 
+Thus we can write 
+
+\begin{equation}
+p(x_j \given x_1, \dots, x_{j-1}, x_{j+1}, \dots, x_n) = p\left(x_j \given x_{1:n \setminus j}\right)    
+\end{equation}
+
+Sometimes it is interesting or convenient to rewrite one conditional \textit{pdf} in terms of other \textit{pdf}. Let's say that we want to calculate the value of $p(x_j \given x_1, \dots, x_{j-1}, x_{j+1}, \dots, x_n)$, but we do not actually have the formula of $p\left(x_j \given x_{1:n \setminus j}\right)$, one way is to rewrite it in terms of other \textit{pdf} that we might know how to calculate. Equation \ref{eq:conditional-manipulation} shows how to do that.
+
+\begin{equation}
+    \begin{aligned}
+        \pr{x_j \given x_{1:n \setminus j}} &= \dfrac{\color{blue}\pr{x_{1:n}}}{ \pr{x_{1:n \setminus j}} }\\
+        &= \dfrac{\color{blue} \pr{x_i \given x_{1:n \setminus i} } \, \pr{x_{1:n \setminus i} } }{\pr{x_{1:n \setminus j}} } \\
+        &= \dfrac{\pr{x_i \given x_{1:n \setminus i} } \, \color{magenta} \pr{x_{1:n \setminus i} } }{\pr{x_{1:n \setminus j}} } \\
+        &= \dfrac{\pr{x_i \given x_{1:n \setminus i} }\,\color{magenta} \pr{x_j \given x_{1:n \setminus \cbrac{i, j}} } \, \pr{x_{1:n \setminus \cbrac{i, j}}} }{\color{blue} \pr{x_{1:n \setminus j}}}\\
+        &= \dfrac{\pr{x_i \given x_{1:n \setminus i} }\,\pr{x_j \given x_{1:n \setminus \cbrac{i, j}} } \, \pr{x_{1:n \setminus \cbrac{i, j}}} }{\color{blue} \pr{x_i \given x_{1:n \setminus \cbrac{i, j}}} \, \pr{x_{1:n \setminus \cbrac{i, j}}} }\\
+        %
+        &= \dfrac{\pr{x_i \given x_{1:n \setminus i} }\,\pr{x_j \given x_{1:n \setminus \cbrac{i, j}} } }{\color{blue} \pr{x_i \given x_{1:n \setminus \cbrac{i, j}}} }
+    \end{aligned}
+    \label{eq:conditional-manipulation}
+\end{equation}
+The above relation will be used further when deriving the measurement update equation of the Bayes Filter.
+
+Other \textit{pdf} manipulation of our interest is when we have a conditional distribution with two or more variables been conditioned and we want to split it in a product of two or more \textit{pdf} each with just one conditioned variable. 
+\begin{equation}
+\begin{aligned}
+    \pr{x_{1:j} \given x_{j+1:n}} &=  \dfrac{\blue{\pr{x_{1:n}}}}{\pr{x_{j+1:n}}} \\
+    &= \dfrac{\displaystyle\blue{ \left(\prod_{i = 1}^{n-1} \pr{x_i | x_{i+1}, \dots, x_n} \right) \pr{x_n} } }{\pr{x_{j+1:n}}} && \small\text{Chain rule Eq. \ref{eq:probability-chain-rule}} \\
+    &= \dfrac{\displaystyle \blue{ \left(\prod_{i = 1}^{j} \pr{x_i | x_{i+1}, \dots, x_j} \right) \pr{x_{j+1:n}} } }{\pr{x_{j+1:n}}} &&= \prod_{i = 1}^{j} \pr{x_i | x_{i+1}, \dots, x_j}
+\end{aligned}
+\label{eq:conditional-manipulation-2}
+\end{equation}
+
+\subsubsection{Marginalization of probability density functions}
+Marginalization is another common operation on \textit{pdf}, it consists of eliminating variables of the joint distribution. That is, we can obtain $\pr{x_{1:n \setminus k}}$ from $\pr{x_{1:n}}$, for example. For continuous random variables it is made by integration, as in Eq. \ref{eq:joint-marginalization}.
+\begin{equation}
+    \pr{x_{1:n \setminus k}} = \Int[x_k]{-\infty}{+\infty}{\pr{x_{1:n}}}
+    \label{eq:joint-marginalization}
+\end{equation}
+
+Equation \ref{eq:conditional-marginalization} shows that it can be also applied in conditional distributions, in the conditioned variables.
+
+\begin{equation}
+    \pr{x_j \given x_{1:n \setminus \cbrac{j, k}}} =  \Int[x_k]{-\infty}{+\infty}{\pr{x_j, x_k \given x_{1:n \setminus \cbrac{j, k}}} }
+    \label{eq:conditional-marginalization}
+\end{equation}
+
+\subsection{The General Bayes Filter}
+\label{sec:bayes-filter}
+In this Section I will present the General Bayes Filter algorithm, a recursive way to propagate probability density functions of the system estimated state through time. In the following Sections specific Bayes Filters will be derived, such as the Kalman Filter and the Information Filter. The derivation of the algorithm depends on the premise that the system state is complete.
+
+A state $x_k$ is called complete when its knowledge turns the past controls $\{u_1, u_2, \dots, u_{k-1}\}$ and past measurements $\{z_1, z_2, \dots, z_{k-1}\}$ useless for predicting the system future state. In other words, no variables prior to step $k$ carry additional information for predicting the future more accurately when one knows the system predate state. Such systems are also known as Markov Chains \cite[p.~21]{bongard2006probabilistic}. This statement is put in mathematical terms in Eq. \ref{eq:complete-state}.
+
+\begin{equation}
+p(\hat{x}_k \,|\, \hat{x}_{k-1}, z_{1:k-1}, u_{1:k}) = p(\hat{x}_k \,|\, x_{k-1}, u_k)
+\label{eq:complete-state}
+\end{equation}
+
+The $\belF{\cdot}$ symbol is a more compact way to write the probability density function of the estimated stated conditioned to the measurements and controls up to step $k$. The $\bar{\bel}(\cdot)$, also known as predicted belief, is almost the same but in this one the \textit{kth} measurement is not incorporated in the prediction.
+
+\begin{equation}
+\begin{cases}
+    \bel(\hat{x}_k) &= \pr{\hat{x}_k \,|\, z_{1:k}, u_{1:k}}\\
+    \bar{\bel}(\hat{x}_k) &= \pr{\hat{x}_k \,|\, z_{1:k-1}, u_{1:k}}
+\end{cases}
+\label{eq:belief}
+\end{equation}
+
+The $\eta$ value is a normalization factor calculated to maintain the probability mass of the distribution equals to one.
+
+\begin{algorithm}[h]
+\caption{General Bayes Filter}
+\label{alg:general-bayes-filter}
+\begin{algorithmic}[1]
+\Procedure{Bayes Filter}{$\bel(\hat{x}_{k-1}), u_k, z_k$}
+\State $\bar{\bel}(\hat{x}_k) \gets \int{\pr{\hat{x}_k \,|\, \hat{x}_{k-1}, u_k) \bel(\hat{x}_{k-1}} } \dd{\hat{x}_{k-1}}$ \Comment{prediction}
+\State $\bel(\hat{x}_k) \gets \eta \, p(z_k \,|\, \hat{x}_k) \,\bar{\bel}(\hat{x}_k)$ \Comment{measurement update}
+\State \Return $\bel(\hat{x}_k)$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+First I will prove the measurement update equation, with the Bayes theorem and a little mathematical manipulation.
+
+\begin{equation}
+    \begin{aligned}
+        \bel(\hat{x}_k) &= \pr{\hat{x}_k \given \blue{z_{1:k}}, u_{1:k}}\\
+        &= \pr{\hat{x}_k \given \blue{z_k, z_{1:k-1}}, u_{1:k}} \\
+        &= \dfrac{\pr{z_k \given \hat{x}_k, z_{1:k-1}, u_{1:k}} \, \pr{\hat{x}_k \given z_{1:k-1}, u_{1:k}}}{\pr{z_k \given z_{k-1}, u_{1:k}}} && \small\text{Applied Eq. \ref{eq:conditional-manipulation}}\\
+        &= \dfrac{\pr{z_k \given \hat{x}_k, z_{1:k-1}, u_{1:k}} \, \pr{\hat{x}_k \given z_{1:k-1}, u_{1:k}}}{\magenta{\pr{z_k \given z_{k-1}, u_{1:k}}}}\\
+        &= \magenta\eta \, \pr{z_k \given \hat{x}_k, z_{1:k-1}, u_{1:k}} \, \blue{\pr{\hat{x}_k \given z_{1:k-1}, u_{1:k}}}\\
+        &= \eta \, \pr{z_k \given \hat{x}_k, z_{1:k-1}, u_{1:k}} \, \blue{\bar{\bel}\parentheses{\hat{x}_k}}
+    \end{aligned}
+\end{equation}
+
+Using the premise that the estimated state $\hat{x}_k$ is complete, we have that 
+\begin{equation}
+ p(z_k \,|\, \hat{x}_k, z_{1:k-1}, u_{1:k}) = p(z_k \given \hat{x}_k)   
+\end{equation}
+because no past measurement or control adds new information. We can say that the predicted measurement is conditionally independent of the previous measurements and, controls (including the current), if we know the current state. From the above development, we get Eq. \ref{eq:bayes-filter-update}, which is the measurement update equation in line 3 of the General Bayes Filter algorithm.
+
+\begin{equation}
+    \belF{\hat{x}_k} = \eta \, p(z_k | \hat{x}_k) \color{black}\,\bar{\bel}\parentheses{\hat{x}_k}
+    \label{eq:bayes-filter-update}
+\end{equation}
+
+Now, the prediction step.
+
+\begin{equation}
+\begin{aligned}
+    \bar{\bel}\parentheses{\hat{x}_k} &= \pr{\hat{x}_k \given z_{1:k-1}, u_{1:k}} \\
+    &= \Int[\hat{x}_{k-1}]{-\infty}{+\infty}{\pr{\hat{x}_k, \hat{x}_{k-1} \given z_{1:k-1}, u_{1:k}}} && \small\text{Applied Eq. \ref{eq:conditional-marginalization}} \\
+    &= \Int[\hat{x}_{k-1}]{-\infty}{+\infty}{\magenta{\pr{\hat{x}_k \given \hat{x}_{k-1}, z_{1:k-1}, u_{1:k}}} \, \pr{\hat{x}_{k-1} \given z_{1:k-1}, u_{1:k}} } && \small\text{Applied Eq. \ref{eq:conditional-manipulation-2}}\\
+    &= \Int[\hat{x}_{k-1}]{-\infty}{+\infty}{\magenta{\pr{\hat{x}_k \given \hat{x}_{k-1}, u_k}} \, \pr{\hat{x}_{k-1} \given z_{1:k-1}, u_{1:k}} } && \small\text{Appied Eq. \ref{eq:complete-state}}
+\end{aligned}
+\end{equation}
+
+Now with $\pr{\hat{x}_{k-1} \given z_{1:k-1}, u_{1:k}}$ we use the assumption that the control in step $k$ does not influence in the estimation of state in step $k-1$. This means that we are assuming that Eq. \ref{eq:control-assumption} holds
+\begin{equation}
+    \pr{\hat{x}_{k-1} \given z_{1:k-1}, u_{1:k}} = \pr{\hat{x}_{k-1} \given z_{1:k-1}, u_{1:k-1}}
+    \label{eq:control-assumption}
+\end{equation}
+with this we have
+\begin{equation}
+\begin{aligned}
+    \bar{\bel}\parentheses{\hat{x}_k} &= \Int[\hat{x}_{k-1}]{-\infty}{+\infty}{\pr{\hat{x}_k \given \hat{x}_{k-1}, u_k} \, \pr{\hat{x}_{k-1} \given z_{1:k-1}, \blue{u_{1:k}}} }\\
+    &= \Int[\hat{x}_{k-1}]{-\infty}{+\infty}{\pr{\hat{x}_k \given \hat{x}_{k-1}, u_k} \, \pr{\hat{x}_{k-1} \given z_{1:k-1}, \blue{u_{1:k-1}}} } && \small\text{Applied Eq. \ref{eq:control-assumption}}\\
+    &= \Int[\hat{x}_{k-1}]{-\infty}{+\infty}{\pr{\hat{x}_k \given \hat{x}_{k-1}, u_k} \, \magenta{\pr{\hat{x}_{k-1} \given z_{1:k-1}, u_{1:k-1}}} } \\
+    &= \Int[\hat{x}_{k-1}]{-\infty}{+\infty}{\pr{\hat{x}_k \given \hat{x}_{k-1}, u_k} \, \magenta{\belF{\hat{x}_k}} }
+\end{aligned}
+\label{eq:bayes-filter-prediction}
+\end{equation}
+Equation \ref{eq:bayes-filter-prediction} is the prediction equation in the second line of the Bayes Filter algorithm.
+
+
+\subsection{Kalman Filters}
+\magenta{\textbf{EXPLAIN THAT IN LINEAR CASES THE KALMAN FILTER IS THE OPTIMAL TRACKER}}\\
+The Kalman Filter (KF) is a type of parametric Bayes Filter, the one we saw in Sec. \ref{sec:bayes-filter}. So it is an algorithm to estimate the system state, given the controls and measurements. This filter uses the hypotheses that, the system states and erros, can be represented as a Normal Distribution, which is parameterized by the mean and covariance. \\
+\magenta{\textbf{EXPLICAR QUE ESSA ASSUNÇÃO FAZ SENTIDO DE ACOROD COM O TEOREMA DO LIMITE CENTRAL}}
+
+\subsubsection{Kalman Filter Taxonomy}
+Before getting into the specifics of the Kalman Filter and how it works, I will make a disclaimer about the naming of the different variants of Kalman Filters out there, a good understanding of the meaning of these names can lead the reader into a less cumbersome path when learning about this technique for the first time. More than that, it establishes a precise vocabulary to be used when talking about KF with other researchers, for instance. I will use the convention adopted in \cite[p. ~151]{lewis2017optimal}, for this is important to know, first, how dynamic system are classified. 
+
+The authors classify systems with respect to the dynamic model, if the system state is a discrete function of time or if it is a continuous function of time. And if the measurements are continuous or discrete functions of time too. So if the system dynamics is continuous and its measurements are discrete, the system is called continuous-discrete. Hence, if the system dynamics is discrete and the measurements are also discrete, the system is called discrete-discrete, and so fourth. Besides the type in time of measurement and dynamics, we have linear and nonlinear dynamics and measurement models. This also has to be taken into consideration when deciding which type of KF to use.
+
+For each combination of the aforementioned characteristics there is a Kalman Filter algorithm to be used. In this text I will derive which I call the ``classic'' Kalman Filter, which is the KF for \textit{linear discrete-discrete} systems. And also the Extended Kalman Filter (EKF), which is the KF for \textit{nonlinear (continuous/discrete)-discrete} systems.
+
+\subsubsection{Kalman Filter (classic)}
+As I said previously, the Kalman Filter is a type of Bayes Filter, presented in Section \ref{sec:bayes-filter}. This means that we could derive it from Algorithm \ref{alg:general-bayes-filter} placing a Gaussian distribution in the probability density functions as in \cite[p.~45]{bongard2006probabilistic}, but I found it very cumbersome and with lots of mathematical tricks, instead, I will derive as the way that is classically done. 
+
+Let's say we have a discrete linear time-variant model, like the one in Eq. \ref{eq:discrete-linear-state-space}, and since this model is from a physical system, the feedforward matrix $\mat{D_k}$ is null. Also, since this is a model from a physical system is reasonable that we have a modeling error, $\mb{\varepsilon}_\mathbf{k}$, since that by definition models are not perfect. Here we will assume that this error can be modeled by a Gaussian distribution with zero mean and covariance $\mat{R_k}$, $\mb{\varepsilon}_\mathbf{k} \sim \normal{\mat{0}}{\mat{R_k}}$, that this errors are not correlated in time (the error in step $k$ is not correlated with the error in step $k+1$, $\expv{\mb{\varepsilon}_\mathbf{k} \, \mb{\varepsilon}_\mathbf{k+1}} = \mat{0}$), and that the error is not correlated with the systems state, therefore $\expv{\bvec{x_k} \, \mb{\varepsilon}_\mathbf{k}} = \mat{0}$. Besides the modeling error, we also assume that our measurement $\bvec{y_k}$ is not perfect too, due to sensor errors. The sensor error, $\mb{\delta}_\mathbf{k}$, is also assumed to be time uncorrelated and have zero mean with covariance $\mat{Q_k}$, $\mb{\delta}_\mathbf{k} \sim \normal{\mat{0}}{\mat{Q_k}}$.
+Those are the basic assumptions needed to guarantee the Kalman Filter's optimality.
+
+Summing it all, our system is described by Eq. \ref{eq:kf-system}
+\begin{equation}
+    \begin{aligned}
+        \bvec{x_k} &= \mat{A_k}\bvec{x_{k-1}} + \mat{B_k}\bvec{u_k} + \mb{\varepsilon}_\mathbf{k}\\
+        \bvec{y_k} &= \mat{C_k}\bvec{x_k} + \mb{\delta}_\mathbf{k}
+    \end{aligned}
+    \label{eq:kf-system}
+\end{equation}
+Since we do not know, exactly, our modeling error $\mb{\varepsilon}_\mathbf{k}$, we can predict the mean of the current state distribution, $\mb{\bar{\mu}}_\mathbf{k}$, using the previous state mean
+\begin{equation}
+    \begin{aligned}
+        \mb{\bar{\mu}}_\mathbf{k} &= \expv{\mat{A_k}\bvec{x_{k-1}} + \mat{B_k}\bvec{u_k} + \mb{\varepsilon}_\mathbf{k}}\\
+        & = \expv{\mat{A_k}\bvec{x_{k-1}} + \mat{B_k}\bvec{u_k}} + \cancelto{\mat{0}}{\expv{\mb{\varepsilon}_\mathbf{k}}}\\
+        &= \mat{A_k}\blue{\expv{\bvec{x_{k-1}}}} + \mat{B_k}\bvec{u_k}\\
+        &= \mat{A_k}\blue{\mb{\mu}_\mathbf{k-1}} + \mat{B_k}\bvec{u_k}
+    \end{aligned}
+    \label{eq:kf-prdiction}
+\end{equation}
+
+A good thing to know is how wrong is this prediction in relation to the actual system state. For this, we could calculate the predictin error, $\bvec{\bar{e}_k} = \bvec{x_k} - \mb{\bar{\mu}}_\mathbf{k}$, sparseness. In other words, we want to know the prediction error covariance matrix, $\mat{\bar{P}_k}$, defined as the expectation in Eq. \ref{eq:kf-error-covariance-matrix-def}.
+
+\begin{equation}
+    \mat{\bar{P}_k} = \expv{\bvec{\bar{e}_k} \, \bvecT{\bar{e}_k}}
+    \label{eq:kf-error-covariance-matrix-def}
+\end{equation}
+
+The current prediction error can be rewritten as follows:
+\begin{equation}
+    \begin{aligned}
+        \bvec{\bar{e}_k} &= \blue{\bvec{x_k}} - \magenta{\mb{\bar{\mu}}_\mathbf{k}} \\
+        &= \blue{\mat{A_k}\bvec{x_{k-1}} + \cancel{\mat{B_k}\bvec{u_k}} + \mb{\eps}_\mathbf{k}} - \magenta{\mat{A_k} \mb{\mu}_\mathbf{k-1} + \cancel{\mat{B_k}\bvec{u_k}} }\\
+        &= \mat{A_k}\parentheses{\bvec{x_{k-1}} - \mb{\mu}_\mathbf{k-1}} + \mb{\eps}_\mathbf{k} \\
+        &= \mat{A_k}\bvec{e_{k-1}} + \mb{\eps}_\mathbf{k}
+    \end{aligned}
+\end{equation}
+Using the above \textquote{error dynamic system}, we can write the prediction error covariance matrix as
+\begin{equation}
+    \begin{aligned}
+        \mat{\bar{P}_k} &= \expv{\bvec{\bar{e}_k} \, \bvecT{\bar{e}_k}}\\
+        &= \expv{\parentheses{\mat{A_k}\bvec{e_{k-1}} + \mb{\varepsilon}_\mathbf{k}} \blue{\parentheses{\mat{A_k}\bvec{e_{k-1}} + \mb{\varepsilon}_\mathbf{k}}^\mathbf{T}}}\\
+        &= \expv{\parentheses{\mat{A_k}\bvec{e_{k-1}} + \mb{\varepsilon}_\mathbf{k}} \blue{\parentheses{\bvecT{e_{k-1}}\matT{A_k} + \mb{\varepsilon}_\mathbf{k}^\mathbf{T}}}}\\
+        &= \mat{A_k}\expv{\mathbf{e_{k-1}\,e_{k-1}^T}}\matT{A_k} + \mat{A_k}\underbrace{\expv{\bvec{e_{k-1}}\,\mb{\eps}_\mathbf{k}^\mathbf{T}}}_{\mat{0}}+ \underbrace{\expv{\mb{\varepsilon}_\mathbf{k}\bvecT{e_{k-1}}}}_{\mat{0}}\matT{A_k} + \expv{\mb{\varepsilon}_\mathbf{k}\,\mb{\varepsilon}_\mathbf{k}^\mathbf{T}}\\
+        &= \mat{A_k} \blue{\expv{\bvec{e_{k-1}} \bvecT{e_{k-1}}}} \matT{A_k} + \magenta{\expv{\mb{\varepsilon}_\mathbf{k}\,\mb{\varepsilon}_\mathbf{k}^\mathbf{T}}}\\
+        &= \mat{A_k} \blue{\mat{P_{k-1}}} \matT{A_k} + \magenta{\mat{R_k}}
+    \end{aligned}
+    \label{eq:kf-prediction-covariance}
+\end{equation}
+
+From Eq. \ref{eq:kf-prediction-covariance}, we can see that the prediction error covariance grows between time steps, because in each time step a term $\mat{R_k}$ (positive definite) is always added. So the predicted mean diverges from the actual system state. What we want to have is a correction term $\mat{\Psi_k}$ to correct our predicted mean towards the actual one.
+
+\begin{equation}
+    \mb{\mu}_\mathbf{k} = \mb{\bar{\mu}}_\mathbf{k} + \mat{\Psi_k}
+\end{equation}
+
+But until now, we just used the system dynamics, when, we also have the system measurement. The idea is, somehow, to use the measurement to correct our prediction, even in presence of the measurement noise $\mb{\delta}_\mathbf{k}$. Let's call by $\bvec{z_k}$ the measurement we would expect to get from the sensor if the system state was close to the predicted mean.
+
+\begin{equation}
+    \bvec{z_k} = \mat{C_k}\, \mb{\bar{\mu}}_\mathbf{k}
+\end{equation}
+
+We can use the error between the actual measurement, $\bvec{y_k}$, and the predicted one, $\bvec{z_k}$, in order to correct the predicted mean towards the actual system state. 
+
+The Kalman Filter proposes the following correction term, proportional to the difference between $\bvec{y_k}$ and $\bvec{z_k}$:
+\begin{equation}
+    \mat{\Psi_k} = \mat{K_k}\parentheses{\bvec{y_k} - \bvec{z_k}}
+    \label{eq:kalman-correction-term}
+\end{equation}
+so the correction, or state update, would be given by Eq. \ref{eq:kf-update}.
+\begin{equation}
+    \mb{\mu}_\mathbf{k} = \mb{\bar{\mu}}_\mathbf{k} + \blue{\mat{K_k}}\parentheses{\bvec{y_k} - \mat{C_k}\mb{\bar{\mu}}_\mathbf{k}}
+    \label{eq:kf-update}
+\end{equation}
+
+All the terms from the above Equation, the state update equation, are known, except for the $\mat{K_k}$ term, known as Kalman Gain. Further we will use this term to \emph{minimize} the error between the estimated state mean, $\mb{\mu}_\mathbf{k}$ and the actual system state, $\bvec{x_k}$.
+
+The estimated error, $\mb{\eta}_\mathbf{k}$, between the system state and the updated (or corrected) mean, is given by Eq. \ref{eq:estimated-error}.
+
+\begin{equation}
+    \begin{aligned}
+       \mb{\eta}_\mathbf{k} &= \bvec{x_k} - \mb{\mu}_\mathbf{k} \\
+       &= \bvec{x_k} - \mb{\bar{\mu}}_\mathbf{k} - \mat{K_k}\parentheses{\magenta{\bvec{y_k}} - \mat{C_k}\mb{\bar{\mu}}_\mathbf{k}}\\
+       &= \blue{\bvec{x_k} - \mb{\bar{\mu}}_\mathbf{k}} - \mat{K_k}\parentheses{\magenta{\mat{C_k}\bvec{x_k} + \mb{\delta}_\mathbf{k}} - \mat{C_k}\mb{\bar{\mu}}_\mathbf{k}}\\
+       &= \blue{\mat{I}\bvec{x_k} - \mat{I}\,\mb{\bar{\mu}}_\mathbf{k}} - \mat{K_k}\parentheses{\mat{C_k}\bvec{x_k} + \mb{\delta}_\mathbf{k} - \mat{C_k}\mb{\bar{\mu}}_\mathbf{k}}\\
+       &= \mat{I}\bvec{x_k} - \mat{I}\,\mb{\bar{\mu}}_\mathbf{k} - \mat{K_k}\mat{C_k}\bvec{x_k} - \mat{K_k}\mb{\delta}_\mathbf{k} + \mat{K_k}\mat{C_k}\mb{\bar{\mu}}_\mathbf{k}\\
+       &= \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}\bvec{x_k} - \parentheses{\mat{I} + \mat{K_k}\mat{C_k}}\mb{\bar{\mu}}_\mathbf{k} - \mat{K_k}\mb{\delta}_\mathbf{k}\\
+       &= \parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \blue{\parentheses{\bvec{x_k} - \mb{\bar{\mu}}_\mathbf{k}}} - \mat{K_k}\mb{\delta}_\mathbf{k}\\
+       &= \parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \blue{\bvec{\bar{e}_k}} - \mat{K_k}\mb{\delta}_\mathbf{k}\\
+    \end{aligned}
+    \label{eq:estimated-error}
+\end{equation}
+
+Now, we can calculate the estimated error covariance, $\mat{P_k}$.
+
+\begin{equation}
+    \begin{aligned}
+        \mat{P_k} &= \expv{\mb{\eta}_\mathbf{k}\,\mb{\eta}_\mathbf{k}^\mathbf{T}}\\
+        &= \expv{\parentheses{\parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \bvec{\bar{e}_k} - \mat{K_k}\mb{\delta}_\mathbf{k}}\, \parentheses{\parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \bvec{\bar{e}_k} - \mat{K_k}\mb{\delta}_\mathbf{k}}^\mathbf{T}}\\
+        &= \expv{\parentheses{\parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \bvec{\bar{e}_k} - \mat{K_k}\mb{\delta}_\mathbf{k}}\, \parentheses{\bvecT{\bar{e}_k} \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}^\mathbf{T}  - \mb{\delta}_\mathbf{k}^\mathbf{T}\matT{K_k}}}\\
+        &= \begin{aligned}
+        \mathbb{E}\,\Big[(\mat{I}& - \mat{K_k}\mat{C_k}) \bvec{\bar{e}_k} \bvecT{\bar{e}_k} \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}^\mathbf{T} - \parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \bvec{\bar{e}_k}\mb{\delta}_\mathbf{k}^\mathbf{T}\matT{K_k} - \dots \\ &\mat{K_k}\mb{\delta}_\mathbf{k}\bvecT{\bar{e}_k} \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}^\mathbf{T} + \mat{K_k}\mb{\delta}_\mathbf{k}\mb{\delta}_\mathbf{k}^\mathbf{T}\matT{K_k}\Big]
+        \end{aligned}\\
+        &= \begin{aligned}
+        &\parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \expv{\bvec{\bar{e}_k} \bvecT{\bar{e}_k}} \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}^\mathbf{T} - \parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \blue{\expv{\bvec{\bar{e}_k}\mb{\delta}_\mathbf{k}^\mathbf{T}}}\matT{K_k} - \dots \\ &\mat{K_k} \magenta{\expv{\mb{\delta}_\mathbf{k}\bvecT{\bar{e}_k}}} \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}^\mathbf{T} + \mat{K_k}\expv{\mb{\delta}_\mathbf{k}\mb{\delta}_\mathbf{k}^\mathbf{T}}\matT{K_k}
+        \end{aligned}\\
+        &=\parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \expv{\bvec{\bar{e}_k} \bvecT{\bar{e}_k}} \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}^\mathbf{T} - \blue{\mat{0}} - \magenta{\mat{0}} + \mat{K_k}\expv{\mb{\delta}_\mathbf{k}\mb{\delta}_\mathbf{k}^\mathbf{T}}\matT{K_k}\\
+        &=\parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \blue{\expv{\bvec{\bar{e}_k} \bvecT{\bar{e}_k}}} \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}^\mathbf{T} + \mat{K_k}\magenta{\expv{\mb{\delta}_\mathbf{k}\mb{\delta}_\mathbf{k}^\mathbf{T}}}\matT{K_k}\\
+        &=\parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \blue{\mat{\bar{P}_k}} \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}^\mathbf{T} + \mat{K_k}\magenta{\mat{Q_k}}\matT{K_k}
+    \end{aligned}
+    \label{eq:kf-estimate-covariance}
+\end{equation}
+
+Expanding the above result, we have that:
+\begin{equation*}
+    \mat{P_k} = \mat{\bar{P}_k} - \mat{\bar{P}_k}\matT{C_k}\matT{K_k} - \mat{K_k C_k \bar{P}_k} +  \blue{\mat{K_k}}\brac{\mat{C_k}\mat{\bar{P}_k}\matT{C_k} + \mat{Q_k}}\blue{\matT{K_k}}
+\end{equation*}
+which is a quadratic in $\mat{K_k}$. Another interest thing to note, is that in $\mat{P_k}$ diagonal we have the estimated error variances, so its trace is the sum of the Mean Squared Errors between the estimated mean and the actual state. The best we can do is to minimize this quantity, in order to get the best estimation possible. 
+
+So, all we have to do is find the minimum of $\Tr(\mat{P_k})$ with respect to $\mat{K_k}$, since it is the only thing we can change. For this we will differentiate $\Tr(\mat{P_k})$ in relation to $\mat{K_k}$ using the results of Equations \ref{eq:trace-ax^tb-derivative}, \ref{eq:trace-axb-derivate} and \ref{eq:trace-xax^t-derivative}.
+
+\begin{equation*}
+   \begin{aligned}
+       \diffp[]{}{\mat{K_k}}\Tr(\mat{P_k}) &= \diffp[]{}{\mat{K_k}} \Tr\parentheses{\mat{\bar{P}_k} - \mat{\bar{P}_k}\matT{C_k}\matT{K_k} - \mat{K_k C_k \bar{P}_k} +  \mat{K_k}\brac{\mat{C_k}\mat{\bar{P}_k}\matT{C_k} + \mat{Q_k}}\matT{K_k}}\\
+       &= \begin{aligned}
+       &\cancelto{\mat{0}}{\diffp[]{}{\mat{K_k}} \Tr(\mat{\bar{P}_k})} - \diffp[]{}{\mat{K_k}}\Tr(\mat{\bar{P}_k}\matT{C_k}\matT{K_k}) - \diffp[]{}{\mat{K_k}}\Tr(\mat{K_k C_k \bar{P}_k}) + \dots\\ &\diffp[]{}{\mat{K_k}}\Tr(\mat{K_k}\brac{\mat{C_k}\mat{\bar{P}_k}\matT{C_k} + \mat{Q_k}}\matT{K_k})
+       \end{aligned}\\
+       &= -\blue{\mat{\bar{P}_k}\matT{C_k} - \matT{\bar{P}_k}\matT{C_k}} + \magenta{\mat{K_k}\brac{\mat{C_k}\mat{\bar{P}_k}\matT{C_k} + \mat{Q_k}}^\mathbf{T} + \mat{K_k}\brac{\mat{C_k}\mat{\bar{P}_k}\matT{C_k} + \mat{Q_k}}}\\
+       &= \magenta{2 \mat{K_k}\brac{\mat{C_k}\mat{\bar{P}_k}\matT{C_k} + \mat{Q_k}}} - \blue{2 \mat{\bar{P}_k}\matT{C_k}}
+   \end{aligned} 
+\end{equation*}
+
+Making the above equals to zero, give us the $\mat{K_k}$ matrix that minimizes the sum of the mean squared errors between the actual system state and our estimate, leading us to Eq. \ref{eq:kf-gain}, which is the Kalman Gain equation.
+
+\begin{equation}
+    \mat{K_k} = \mat{\bar{P}_k}\matT{C_k} \brac{\mat{C_k}\mat{\bar{P}_k}\matT{C_k} + \mat{Q_k}}^\mathbf{-1}
+    \label{eq:kf-gain}
+\end{equation}
+
+Algorithm \ref{alg:discrete-discrete-kf} shows the five equations used in the Kalman Filter.
+\begin{algorithm}[h]
+\caption{Discrete-Discrete Kalman Filter}
+\label{alg:discrete-discrete-kf}
+\begin{algorithmic}[1]
+\Procedure{Kalman Filter}{$\mb{\mu}_\mathbf{k-1}, \mat{P_{k-1}}, \bvec{u_k}, \bvec{y_k}$}
+\State $\mb{\bar{\mu}}_\mathbf{k} \gets \mat{A_k}\bvec{x_{k-1}} + \mat{B_k}\bvec{u_k}$ \Comment{Linear Prediction}
+\State $\mat{\bar{P}_k} \gets \mat{A_k P_{k-1} A^T_k + R_k}$ \Comment{Covariance Prediction}
+\State $\mat{K_k} \gets \mat{\bar{P}_k C^T_k \parentheses{C_k \bar{P}_k C^T_k + Q_k}^{-1}}$ \Comment{Kalman Gain}
+\State $\mb{\mu}_\mathbf{k} \gets \mb{\bar{\mu}}_\mathbf{k} + \mat{K_k} \parentheses{\bvec{y_k} - \mat{C_k}\mb{\bar{\mu}}_\mathbf{k}}$ \Comment{State Update}
+\State $\mat{P_k} \gets \parentheses{\mat{I} - \mat{K_k C_k}}\mat{\bar{P}_k} \parentheses{\mat{I} - \mat{K_k C_k}}^\mathbf{T} + \mat{K_k P_k K_k^T}$ \Comment{Estimation Uncertainty}
+\State \Return $\mb{\mu}_\mathbf{k}, \mat{P_k}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+Equation \ref{eq:kf-estimation-uncertainty-classic} is the prediction error covariance more commonly encountered in books, instead of Eq. \ref{eq:kf-estimate-covariance}. But the later is a better alternative in presence of roundoff error, and is often used in actual software implementation according to \cite[p.~ 73]{lewis2017optimal}.
+
+\begin{equation}
+    \mat{P_k} = \parentheses{\mat{I} - \mat{K_k C_k}}\mat{\Bar{P}_k}
+    \label{eq:kf-estimation-uncertainty-classic}
+\end{equation}
+
+\subsubsection{Discrete-Discrete Extended Kalman Filter (EKF)}
+%*When writing about EKF applied in SLAM, it is important to emphasize that the map is part of the system state. The system state is composed by the robot state and the map state.
+The derivation of the EKF is analogous to the KF, but I will do it anyway. The EKF is all about non-linear systems, in a nutshell it linearizes the non-linear system equations around the estimated and predicted means of the system state distributions, and proceeds just the same as the classic Kalman Filter for linear systems.
+Let Eq. \ref{eq:ekf-system} be the system that we want to estimate the state:
+
+\begin{equation}
+\begin{aligned}
+    \bvec{x_k} &= \mb{f}(\bvec{x_{k-1}, u_k}) + \mb{\varepsilon}_\mathbf{k} \\
+    \bvec{y_k} &= \mb{h}(\bvec{x_{k}}) + \mb{\delta}_\mathbf{k}
+\end{aligned}
+    \label{eq:ekf-system}
+\end{equation}
+
+where $\mb{\varepsilon}_\mathbf{k} \sim \normal{\bvec{0}}{\bvec{R_k}}$ and $\mb{\delta}_\mathbf{k} \sim \normal{\bvec{0}}{\bvec{Q_k}}$, the assumptions that the errors are not correlated in time or with the system state are still necessary.
+
+In order to use Kalman filtering we have to linearize the non-linear system in \ref{eq:ekf-system}, for this we use Taylor series expansion and choose the previous approximate state estimate ($\mb{\tilde{\mu}}_\mathbf{k-1}$) to linearize about.
+
+For the system model $\mb{f}()$ we have that
+\begin{equation*}
+    \mb{f}(\bvec{x_{k-1}, u_k}) = \mb{f}(\mb{\tilde{\mu}}_\mathbf{k-1}, \bvec{u_k}) + \underbrace{\diffp[]{\mb{f}(\bvec{x_{k-1}, u_k}) }{\bvec{x_{k-1}}}\bigg\rvert_{\bvec{x_{k-1}} = \mb{\tilde{\mu}}_\mathbf{k-1}}}_{\mat{F_k}} (\bvec{x_{k-1}} - \mb{\tilde{\mu}}_\mathbf{k-1}) + \hot
+\end{equation*}
+ignoring the higher order terms we have a first order linear approximation, $\mb{\tilde{f}}$ to the system model in Eq. \ref{eq:linearized-system-model}
+
+\begin{equation}
+    \mb{\tilde{f}}(\bvec{x_{k-1}, u_k}) = \mb{f}(\mb{\tilde{\mu}}_\mathbf{k-1}, \bvec{u_k}) + \mat{F_k} (\bvec{x_{k-1}} - \mb{\tilde{\mu}}_\mathbf{k-1})
+    \label{eq:linearized-system-model}
+\end{equation}
+the tilde will be used throughout this Section to indicate that we are using the linearized models.
+
+Now that we have the linearized system model, we can calculate the predicted approximate mean:
+\begin{equation*}
+\begin{aligned}
+    \mb{\bar{\tilde{\mu}}_\mathbf{k}} &= \expv{\mb{\tilde{x}}_\mathbf{k}} \\
+    &= \expv{\blue{\mb{\tilde{f}}(\bvec{x_{k-1}, u_k})} + \mb{\varepsilon}_\mathbf{k}}\\
+    &= \expv{\blue{\mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k}) + \mat{F_k} (\bvec{x_{k-1}} - \mb{\tilde\mu}_\mathbf{k-1})}} + \cancelto{\bvec{0}}{\expv{\mb{\varepsilon}_\mathbf{k}}} \\
+    &= \expv{\mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k})} + \mat{F_k}\parentheses{\expv{\bvec{x_{k-1}}} - \expv{\mb{\tilde\mu}_\mathbf{k-1}}}
+\end{aligned}
+\end{equation*}
+at this point we must remember that $\bvec{u_k}$ and $\mb{\tilde\mu}_\mathbf{k-1}$ are vectors with a defined value and not random vectors. It means that $\expv{\mb{\tilde\mu}_\mathbf{k-1}}$ is simply $\mb{\tilde\mu}_\mathbf{k-1}$ and $\expv{\mb{f}\parentheses{\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k}}}$ is equal to $\mb{f}\parentheses{\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k}}$, this follows from the expected value definition in Eq. \ref{eq:expected-value}. Then,
+\begin{equation}
+    \begin{aligned}
+        \mb{\bar{\tilde\mu}}_\mathbf{k} &=    \magenta{\expv{\mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k})}} + \mat{F_k}\parentheses{\expv{\bvec{x_{k-1}}} - \blue{\expv{\mb{\tilde\mu}_\mathbf{k-1}}}}\\
+        &= \magenta{\mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k})} + \mat{F_k}\parentheses{\underbrace{\expv{\bvec{x_{k-1}}}}_{\approx\mb{\tilde\mu}_\mathbf{k-1}} - \blue{\mb{\tilde\mu}_\mathbf{k-1}}}\\
+        &\approx \mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k}) + \mat{F_k}\parentheses{\mb{\tilde\mu}_\mathbf{k-1} - \mb{\tilde\mu}_\mathbf{k-1}}\\
+        &\approx \mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k})
+    \end{aligned}
+\label{eq:ekf-mean-prediction}
+\end{equation}
+another important thing is that we approximate $\expv{\bvec{x_{k-1}}} = \mb{\mu}_\mathbf{k-1}$ to $\mb{\tilde\mu}_\mathbf{k-1}$, another assumption of used in the Extended Kalman Filter.
+
+Just as was done with the classic Kalman Filter, we can calculate the prediction error, $\bvec{\bar{\tilde{e}}_k} = \bvec{\tilde{x}_k} - \mb{\bar{\tilde\mu}}_\mathbf{k}$, sparseness.
+
+\begin{equation}
+\mat{\bar{\tilde P}_k} = \expv{\bvec{\bar{\tilde{e}}_k}\, \bvecT{\bar{\tilde{e}}_k}}    
+\end{equation}
+The current approximate prediction error can be rewritten as follows:
+\begin{equation}
+    \begin{aligned}
+        \bvec{\bar{\tilde{e}}_k} &= \magenta{\bvec{\tilde{x}_k}} - \blue{\mb{\bar{\tilde\mu}}_\mathbf{k}}\\
+        &= \magenta{\cancel{\mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k})} + \mat{F_k} (\bvec{x_{k-1}} - \mb{\tilde\mu}_\mathbf{k-1}) + \mb{\varepsilon}_\mathbf{k}} - \blue{\cancel{\mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k})}}\\
+        &= \mat{F_k} \blue{(\bvec{x_{k-1}} - \mb{\tilde\mu}_\mathbf{k-1})} + \mb{\varepsilon}_\mathbf{k}\\
+        &= \mat{F_k}\blue{\bvec{\tilde{e}_{k-1}}} + \mb{\varepsilon}_\mathbf{k}
+    \end{aligned}
+\end{equation}
+Using the above error system, we can calculate the prediction error covariance matrix as follows:
+\begin{equation}
+    \begin{aligned}
+        \mat{\bar{\tilde P}_k} &= \expv{\bvec{\bar{\tilde{e}}_k}\, \bvecT{\bar{\tilde{e}}_k}}\\
+        &= \expv{(\mat{F_k}\bvec{\tilde{e}_{k-1}} + \mb{\varepsilon}_\mathbf{k-1}) \, \blue{(\mat{F_k}\bvec{\tilde{e}_{k-1}} + \mb{\varepsilon}_\mathbf{k-1})^\mathbf{T}}}\\
+        &= \expv{(\mat{F_k}\bvec{\tilde{e}_{k-1}} + \mb{\varepsilon}_\mathbf{k-1}) \, \blue{(\bvecT{\tilde{e}_{k-1}}\matT{F_k} + \mb{\varepsilon}_\mathbf{k-1}^\mathbf{T}})}\\
+        &= \mat{F_k}\expv{\bvec{\tilde{e}_{k-1}} \bvecT{\tilde{e}_{k-1}}}\matT{F_k} + \mat{F_k} \underbrace{\expv{ \bvec{\tilde{e}_{k-1}} \mb{\varepsilon}_\mathbf{k-1}^\mathbf{T} }}_{\mat{0}} + \underbrace{\expv{\mb{\varepsilon}_\mathbf{k-1} \bvecT{\tilde{e}_{k-1}}}}_{\mat{0}} \matT{F_{k}} + \expv{\mb{\varepsilon}_\mathbf{k-1} \mb{\varepsilon}_\mathbf{k-1}^\mathbf{T}}\\
+        &= \mat{F_k}\magenta{\expv{\bvec{\tilde{e}_{k-1}} \bvecT{\tilde{e}_{k-1}}}}\matT{F_k} + \blue{\expv{\mb{\varepsilon}_\mathbf{k-1} \mb{\varepsilon}_\mathbf{k-1}^\mathbf{T}}}\\
+        &= \mat{F_k}\magenta{ \mat{\tilde{P}_{k-1}} } \matT{F_k} + \blue{\mat{R_k}}
+    \end{aligned}
+\end{equation}
+
+As we did with the classic KF, it is time to include the measurement information to have a better estimate of the system state. To do so, we need to linearize the measurement model too, but this time it is linearized around the predicted approximate mean ($\mb{\bar{\tilde{\mu}}}_\mathbf{k}$):
+\begin{equation*}
+    \mb{h}(\bvec{x_k}) = \mb{h}\parentheses{\mb{\bar{\tilde{\mu}}}_\mathbf{k}} + \underbrace{\diffp[]{\mb{h}(\bvec{x_k})}{\bvec{x_{k}}} \bigg\lvert_{\bvec{x_k}=\bar{\mb{\tilde{\mu}}}_\mathbf{k}}}_{\mat{H_k}} (\bvec{x_k} - \mb{\bar{\tilde{\mu}}}_\mathbf{k}) + \hot
+\end{equation*}
+and, ignoring the higher order terms, we have the first order approximation of the measurement model in Eq. \ref{eq:linearized-measurement-model}.
+\begin{equation}
+    \mb{\tilde{h}}(\bvec{x_k}) = \mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k}) + \mat{H_k} (\bvec{x_k} - \mb{\bar{\tilde\mu}}_\mathbf{k})
+    \label{eq:linearized-measurement-model} 
+\end{equation}
+Then the linearized measurement equation in
+\begin{equation}
+    \bvec{\tilde{y}_k} = \mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k}) + \mat{H_k}(\bvec{x_k} - \mb{\bar{\tilde{\mu}}}_\mathbf{k}) + \mb{\delta}_\mathbf{k}
+\end{equation}
+and the expected system measurement would be
+\begin{equation}
+\begin{aligned}
+    \bvec{\tilde{z}_k} &= \expv{\mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k}) + \mat{H_k}(\bvec{x_k} - \mb{\bar{\tilde{\mu}}}_\mathbf{k}) + \mb{\delta}_\mathbf{k}}\\
+    &= \blue{\expv{\mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k})}} + \mat{H_k}\magenta{\expv{(\bvec{x_k} - \mb{\bar{\tilde{\mu}}}_\mathbf{k})}} + \cancelto{\mat{0}}{\expv{\mb{\delta}_\mathbf{k}}}\\
+    &= \blue{\mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k})} + \mat{H_k}\magenta{(\expv{\bvec{x_k}} - \mb{\bar{\tilde{\mu}}}_\mathbf{k})}\\
+    &= \mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k}) + \mat{H_k}(\mb{\mu}_\mathbf{k} - \mb{\bar{\tilde{\mu}}}_\mathbf{k})\\
+    &= \mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k}) && \small\text{Applying $\mb{\mu}_\mathbf{k} \approx \mb{\bar{\tilde{\mu}}}_\mathbf{k}$}
+\end{aligned}
+\end{equation}
+
+The EKF update equation is given by:
+\begin{equation}
+\begin{aligned}
+    \mb{\tilde\mu}_\mathbf{k} &= \mb{\bar{\tilde\mu}}_\mathbf{k} + \mat{K_k}\parentheses{\bvec{\tilde{y}_k} - \bvec{\tilde{z}_k}}\\
+    &= \mb{\bar{\tilde\mu}}_\mathbf{k} + \mat{K_k}\parentheses{\bvec{\tilde{y}_k} - \mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k})}\\
+    \label{eq:ekf-update}
+\end{aligned}
+\end{equation}
+
+The EKF estimated error is:
+\begin{equation}
+\begin{aligned}
+    \mb{\tilde\eta}_\mathbf{k} &= \bvec{\tilde{x}_k} - \mb{\tilde{\mu}}_\mathbf{k}
+\end{aligned}
+\end{equation}
+
+Using Eq. \ref{eq:linearized-system-model} and \ref{eq:linearized-measurement-model}, we have the first order linear approximation for the non-linear system, in Eq. \ref{eq:ekf-system}, below:
+\begin{equation}
+    \begin{aligned}
+        \bvec{\tilde{x}_k} &= \blue{\mb{\tilde{f}}(\bvec{x_{k-1}, u_k})} + \mb{\varepsilon}_\mathbf{k} &&= \blue{\mb{f}(\mb{\mu}_\mathbf{k-1}, \bvec{u_k}) + \mat{F_k} (\bvec{x_{k-1}} - \mb{\mu}_\mathbf{k-1})} + \mb{\varepsilon}_\mathbf{k}\\
+        \bvec{\tilde{y}_k} &= \magenta{\mb{\tilde{h}}(\bvec{x_k})} + \mb{\delta}_\mathbf{k} &&= \magenta{\mb{h}(\bar{\mb{\mu}}_\mathbf{k}) + \mat{H_k} (\bvec{x_k} - \mb{\bar{\mu}}_\mathbf{k})} + \mb{\delta}_\mathbf{k}\\
+    \end{aligned}
+    \label{eq:ekf-linearized-system}
+\end{equation}
+
+The EKF is the Kalman Filter applied to the linear system in Eq. \ref{eq:ekf-linearized-system}, the jacobian notation $\mat{G_k}$ and $\mat{H_k}$ is a little trick, because the first is the jacobian of the system model with respect to the previous \emph{estimated} approximate mean ($\mb{\tilde\mu}_\mathbf{k-1}$), while the latter is the jacobian of the measurement model with respect to the current \emph{predicted} approximate mean ($\mb{\bar{\tilde\mu}}_\mathbf{k}$).
+
+
+\begin{algorithm}[h]
+\caption{Discrete-Discrete Extended Kalman Filter}
+\label{alg:ekf}
+\begin{algorithmic}[1]
+\Procedure{Extended Kalman Filter}{$\mb{\mu}_\mathbf{k-1}, \mat{P_{k-1}}, \bvec{u_k}, \bvec{z_k}$}
+\State $\mb{\bar{\mu}}_\mathbf{k} \gets \mb{g}(\mb{\mu}_\mathbf{k-1}, \bvec{u_k})$ \Comment{Nonlinear Prediction}
+\State $\mat{\bar{P}_k} \gets \mat{G_k P_{k-1} G^T_k + R_k}$ \Comment{Covariance Prediction}
+\State $\mat{K_k} \gets \mat{\bar{P}_k H^T_k \parentheses{H_k \bar{P}_k H^T_k + Q_k}^{-1}}$ \Comment{Kalman Gain}
+\State $\mb{\mu}_\mathbf{k} \gets \mb{\bar{\mu}}_\mathbf{k} + \mat{K_k} \parentheses{\bvec{z_k} - \mb{h}(\mb{\bar{\mu}}_\mathbf{k})}$ \Comment{State Update}
+\State $\mat{P_k} \gets \parentheses{\mat{I - K_k H_k}} \mat{\bar{P}_k}$ \Comment{Estimation Uncertainty}
+\State \Return $\mb{\mu}_\mathbf{k}, \mat{P_k}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Information Filters}
+Information Filters are more suitable for multi-robot system according to \cite[p.~78]{bongard2006probabilistic}.
+
+\magenta{\textbf{TODO}}
+
+\subsubsection{Classic Information Filter}
+Before getting into the specifics of the information filter, it is important to introduce the Information Vector (Eq. \ref{eq:information-vector}) and, the Information Matrix (Eq. \ref{eq:information-matrix}).
+
+\begin{equation}
+    \mb{\xi} = \mat{P^{-1}} \mb{\mu}
+    \label{eq:information-vector}
+\end{equation}
+
+\begin{equation}
+    \mat{\Omega} = \mat{P^{-1}}    
+    \label{eq:information-matrix}
+\end{equation}
+
+\begin{algorithm}[h]
+\caption{Information Filter}
+\label{alg:information-filter}
+\begin{algorithmic}[1]
+\Procedure{Information Filter}{$\mb{\xi}_\mathbf{k-1}, \mat{\Omega_{k-1}}, \bvec{u_k}, \bvec{z_k}$}
+\State $\mat{\bar{\Omega}_k} \gets \parentheses{\mat{A_k\, \Omega_{k-1}^{-1}\,A_k^T + R_k}}^\mathbf{-1}$
+\State $\mb{\bar{\xi}}_{\mathbf{k}} \gets \mat{\bar{\Omega}_k}\,\parentheses{\mat{A_k\, \Omega_{k-1}^{-1}}\,\mb{\xi}_\mathbf{k-1} + \mat{B_k \,u_k}}$
+\State $\mat{\Omega_k} \gets \mat{\bar{\Omega}_k + C_k^T\, Q_k^{-1}\, C_k}$
+\State $\mb{\xi}_k \gets \mb{\bar{\xi}}_k + \mat{C_k^T\, Q_k^{-1}} \,\bvec{z_k}$
+\State \Return $\mb{\xi}_\mathbf{k}, \mat{\Omega_k}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Extended Information Filter}
+\begin{algorithm}[h]
+\caption{Extended Information Filter}
+\label{alg:information-filter}
+\begin{algorithmic}[1]
+\Procedure{Extended Information Filter}{$\mb{\xi}_\mathbf{k-1}, \mat{\Omega_{k-1}}, \bvec{u_k}, \bvec{y_k}$}
+\State $\mb{\mu}_\mathbf{k-1} \gets \mat{\Omega_{k-1}^{-1}}  \, \mb{\xi}_\mathbf{k-1}$
+\State $\mat{\bar{\Omega}_k} \gets \parentheses{\mat{G_k \, \Omega_{k-1}^{-1} \, G_k^T + R_k}}^\mathbf{-1}$
+\State $\mb{\bar{\xi}}_{\mathbf{k}} \gets \mat{\bar{\Omega}_k} \, \mb{g}(\mb{\mu}_\mathbf{k-1}, \bvec{u_k})$
+\State $\mb{\bar{\mu}}_\mathbf{k} \gets  \mb{g}(\mb{\mu}_\mathbf{k-1}, \bvec{u_k})$
+\State $\mat{\Omega_k} \gets \mat{\bar{\Omega}_k + H_k^T \, Q_k^{-1} \, H_k}$
+\State $\mb{\xi}_k \gets \mb{\bar{\xi}}_k + \mat{H_k^T\, Q_k^{-1}} \brac{\bvec{y_k} - \mb{h}(\mb{\bar{\mu}}_\mathbf{k}) + \mat{H_k}\,\mb{\bar{\mu}}_\mathbf{k}}$
+\State \Return $\mb{\xi}_\mathbf{k}, \mat{\Omega_k}$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Sparse Extended Information Filter}
+
+\subsection{Geometry}
+\subsubsection{Cross product and the skew-symmetric matrix}
+Here I introduce a "matrix form" of calculating the cross product between two vectors. This form will be useful later to calculate the rotation matrix given an axis and the amount of rotation around that axis.
+
+The following, in Equation \ref{eq:cross-product-determinant}, is the determinant form to calculate the cross product between two vectors $\vec{\omega}$ and $\vec{p}$.
+
+\begin{equation}\begin{aligned}
+    \vec{\omega} \times \vec{p} &= 
+        \begin{vmatrix} 
+            \hat{\imath} & \hat{\jmath} & \hat{k} \\
+            \omega_x & \omega_y & \omega_z \\
+            p_x & p_y & p_z 
+        \end{vmatrix} =
+        \begin{vmatrix}
+            \omega_y & \omega_z \\
+            p_y & p_z
+        \end{vmatrix} \hat{\imath} -
+        \begin{vmatrix}
+            \omega_x & \omega_z \\
+            p_x & p_z 
+        \end{vmatrix} \hat{\jmath} +
+        \begin{vmatrix}
+            \omega_x & \omega_y \\
+            p_x & p_y
+        \end{vmatrix} \hat{k} \\
+    \vec{\omega} \times \vec{p} &= 
+        \begin{bmatrix}
+            \omega_y p_z - \omega_z p_y \\
+            \omega_z p_x - \omega_x p_z \\
+            \omega_x p_y - \omega_y p_x
+        \end{bmatrix}
+\end{aligned}
+\label{eq:cross-product-determinant}
+\end{equation}
+
+The above was just for remembering purposes. First of all, a skew-symmetric matrix is a square matrix that its transpose equals its negative, in other words, $A^T = -A$. The $3 \times 3$ skew-symmetric matrices can be used to express cross products.
+
+The skew-symmetric matrix of a vector $\vec{\omega}$ ($[\vec{\omega}]$) is defined in Equation \ref{eq:skew-symmetric-matrix-of-vector}.
+
+\begin{equation}
+    [\vec{\omega}] = \begin{bmatrix}
+                        0 & -\omega_z & \omega_y \\
+                        \omega_z & 0 & -\omega_x \\
+                        -\omega_y & \omega_x & 0
+                     \end{bmatrix}
+    \label{eq:skew-symmetric-matrix-of-vector}
+\end{equation}
+
+Now with this, we can redefine the cross product in Equation \ref{eq:cross-product-determinant} by a product between the skew-symmetric matrix of the vector $\vec{\omega}$ and the vector $\vec{p}$, as shown in Equation \ref{eq:cross-product-skew}.
+
+\begin{equation}
+    \vec{\omega} \times \vec{p} = \left[\vec{\omega}\right] \vec{p} = 
+        \begin{bmatrix}
+            0 & -\omega_z & \omega_y \\
+            \omega_z & 0 & -\omega_x \\
+            -\omega_y & \omega_x & 0
+        \end{bmatrix}
+        \begin{bmatrix}
+            p_x \\ p_y \\ p_z
+        \end{bmatrix} =
+        \begin{bmatrix}
+            \omega_y p_z - \omega_z p_y \\
+            \omega_z p_x - \omega_x p_z \\
+            \omega_x p_y - \omega_y p_x
+        \end{bmatrix}
+    \label{eq:cross-product-skew}
+\end{equation}
+
+\subsubsection{The Rodrigues' rotation formula}
+In this section we will derive the Rodrigues' rotation formula. This formula gives the recipe to calculate the rotation matrix that describes a rotation of $\theta$ radians around an arbitrary unit axis $\hat{\omega}$, represented in Figure \ref{fig:rodrigues-rotation}.
+
+\begin{figure}[h]
+\centering
+    \input{figs/rodrigues-rotation}
+    \caption{Rotation of the position vector $\vec{p}$ around the $\hat{w}$ axis for $\theta$ radians.}
+    \label{fig:rodrigues-rotation}
+\end{figure}
+
+Lets imagine a point placed at the tip of vector $\vec{p}$ at the instant $0$ ($p(0)$) travelling along the dashed arc and achieving the position denoted by $p(\theta)$. One, of many ways, to achieve this rotation is imagining that the point $p$ travels with constant angular velocity of $\omega = \SI[per-mode=symbol]{1}{\radian \per \second}$ during the time period $\theta$ seconds. Let $\phi$ be the constant angle between the rotation axis $\hat{\omega}$ and the vector $\vec{p}(t)\text{, } t \in [0, \theta]$. Regarding to the point's linear velocity, its norm is equivalent to $\lVert \vec{p} \rVert \sin{\phi}$, because it travels along a circle of radius $\lVert \vec{p} \rVert \sin{\phi}$ with unit angular velocity. The point's velocity direction must be tangent to the circular trajectory, therefore orthogonal to $\vec{p}(t)$. All of this can be addressed by Eq. \ref{eq:velocity-of-rotation-around-omega}.
+
+\begin{equation} \begin{aligned}
+    \dot{p} = \hat{\omega} \times \vec{p}(t)
+    \end{aligned}
+    \label{eq:velocity-of-rotation-around-omega}
+\end{equation}
+
+Using the skew-symmetric form, Eq. \ref{eq:cross-product-skew}, we have:
+
+\begin{equation}
+    \dot{p} = \left[ \hat{\omega} \right] p(t)
+    \label{eq:linear-velocity-rotation-around-omega}
+\end{equation}
+
+Equation \ref{eq:linear-velocity-rotation-around-omega} is a ordinary differential equation (ODE) just like \ref{eq:simplest-edo}, therefore, its solution is of the form of Eq. \ref{eq:simplest-edo-solution}.
+
+\begin{equation*}
+    p(t) = e^{\left[ \hat{\omega} \right] t} \, p(0)
+\end{equation*}
+
+Replacing $t$ for $\theta$, we end up with Eq. \ref{eq:rotation=of-theta-around-omega}.
+
+\begin{equation}
+    p(\theta) = e^{\left[ \hat{\omega} \right] \theta} \, p(0)
+    \label{eq:rotation=of-theta-around-omega}
+\end{equation}
+
+Now, using the Taylor series expansion, Eq. \ref{eq:taylor-e-of-A}, and the fact that $[\hat{\omega}]^3 = -[\hat{\omega}]$, we have
+
+\begin{equation}\begin{aligned}
+    e^{[\hat{\omega}]\theta} &= \mathbf{I} + [\hat{\omega}] \, \theta + \frac{[\hat{\omega}]^2 \, \theta^2}{2!} + \frac{\cancelto{-[\hat{\omega}]}{[\hat{\omega}]^3} \, \theta^3}{3!} + \frac{\cancelto{-[\hat{\omega}]^2}{[\hat{\omega}]^4} \, \theta^4}{4!} + \frac{\cancelto{[\hat{\omega}]}{[\hat{\omega}]^5} \, \theta^5}{5!} + \cdots \\
+    &= \mathbf{I} + [\hat{\omega}] \underbrace{\left( \theta - \frac{\theta^3}{3!} + \frac{\theta^5}{5!} - \frac{\theta^7}{7!} + \cdots \right)}_{\sin(\theta)} + [\hat{\omega}]^2 \underbrace{\left( \frac{\theta^2}{2!} - \frac{\theta^4}{4!} + \frac{\theta^6}{6!} - \frac{\theta^8}{8!} + \cdots \right)}_{1 - \cos(\theta)} \\
+    &= \mathbf{I} + [\hat{\omega}] \, \sin(\theta) + (1 - \cos(\theta)) \, [\hat{\omega}]^2
+\end{aligned}
+\label{eq:rodrigues-rotation-matrix-formula}
+\end{equation}
+
+which is known as the Rodrigues' rotation formula.
+
+\subsubsection{Coordinate system}
+A coordinate system $\{s\}$ is composed of an origin and a basis. The basis is a minimum set of vectors which can generate any other vector through their linear combination. It is important to emphasize that any set of $n$ linear-independent vectors can describe the entirety of a $\mathbb{R}^n$ space, in other words, there is an infinity number of bases in any space.
+
+\begin{equation}
+    \{s\} = \{(o_x, o_y, o_z), \{\vec{s_1}, \vec{s_2}, \vec{s_3}\}\}
+    \label{eq:coord-system}
+\end{equation}
+
+All the coordinate systems used in this work have an orthonormal basis. A orthonormal basis have all its vectors of length one and they all are perpendicular to each other. 
+
+\color{blue}
+\subsubsection{TODO: Changing coordinates of a Twist}
+A \textbf{twist} is the combination of an angular and a linear velocity. In the plane it is represented by the following triplet:
+\begin{equation}
+    \mathcal{S} = (\omega, v_x, v_y)
+    \label{eq:twist2d}
+\end{equation}
+\color{black}
+
+\subsection{Differential equations}
+"\textit{Since Newton, mankind has come to realize that the laws of physics are always expressed in the language of differential equations.}" - Steven Strongatz
+
+\subsubsection{The simplest, yet important, linear differential equation: $\boldsymbol{\protect\diffp{}{t} x(t) = a x(t)}$ }
+The above differential equation is one, if not, of the most used equations in control systems. Therefore is very important to know its solution. This same equation can be found in other forms, like the following:
+\begin{subequations}
+    \begin{equation}
+        \dot{x} = ax
+    \end{equation} 
+    \begin{equation}
+        x'(t) = a x(t)
+    \end{equation}
+    \label{eq:simplest-edo}
+\end{subequations}
+
+Before the math starts, it is important to think about the nature of the function $x(t)$, what other function we know that is \textit{very similar} to its derivative? Well, moving forward, we can solve this by manipulating the expression and then integrating it.
+
+\begin{equation*}
+    \frac{x'(t)}{x(t)} = a 
+\end{equation*}
+
+The key insight here, is assume that $x(t) > 0$ and realize that the right side of the above equation is the derivative of $\ln({x(t)})$. After that, all we need to do is integrate both sides.
+
+\begin{align*}
+    \diffp{}{t} (\ln{x(t)}) &= a \\
+    \int{\diffp{}{t} (\ln{x(t)}) \, dt} &= \int{a \, dt} \\
+    \ln{x(t)} &= at + c \\
+    \exp(\ln{x(t)}) &= \exp(at + c) \\
+    x(t) &= \exp(at) \cdot \cancelto{c_0}{\exp(c)} \\
+    x(t) &= e^{at} \, c_0
+\end{align*}
+
+The above development provides a family of solutions to $x(t)$, but if one is pursuing an unique solution, knowing a point $(t_0, x(t_0)$ that belongs to the curve is a must. Because of the following:
+\begin{align*}
+    x(t_0) &= e^{at_0} \, c_0 \\
+    c_0 &= \frac{x(t_0)}{e^{at_0}} \\
+        &= e^{-at_0} x(t_0)
+\end{align*}
+
+It is very common to write $x(0)$ as $x_{t_0}$. So we have the general solution:
+
+\begin{equation}
+    \dot{x} = ax \implies x(t) = e^{a(t - t_0)} \, x_{t_0}
+    \label{eq:simplest-edo-solution}
+\end{equation}
+
+So far I showed that Equation \ref{eq:simplest-edo-solution} is a solution to the  Equation \ref{eq:simplest-edo}. But is it the only one? Lets suppose that there is another solution $y(t)$, and lets also suppose a function $z(t) = e^{-at} \, y(t)$. Now we derive $z(t)$, of course.
+
+\begin{align*}
+    z'(t) &= \diffp{}{t}( e^{-at} \, y(t) ) \\
+    z'(t) &= -a e^{-at} y(t) + \cancelto{a y(t)}{y'(t)} e^{-at} \\
+    z'(t) &= a y(t) \underbrace{(-e^{-at} + e^{-at})}_\text{$0$}\\
+    z'(t) &= 0
+\end{align*}
+
+The above development shows that z(t) is a constant, because its time derivative is zero. So we have that:
+\begin{align*}
+    z(t) = C &= e^{-at} y(t), \, C \in \mathbb{R}\\
+    y(t) &= C e^{at}
+\end{align*}
+
+So the supposed new solution $y(t)$, is indeed of the form $C e^{at}$, therefore, nothing new in the front. With that it is shown that Equation \ref{eq:simplest-edo-solution} is the only solution to \ref{eq:simplest-edo}.
+
+
+\section{The differential drive model dynamics}
+In this section two dynamic models will be derived for the differential drive robot, and I will show which one is the most adequate and why.
+
+\subsection{The differential drive model}
+A differential drive robot is a two-wheeled robot, the wheels are aligned and their velocities can be different from each other. When both wheels have the same velocity, the robot moves forward or backwards. If they have the same speed but in opposite directions, the robot spins around the wheels axle's midpoint, clockwise or counterclockwise. Any configuration different than these makes the robot follow a curved trajectory.  
+
+\begin{figure}[h]
+    \centering
+    \input{figs/diff-drive}
+    \caption{Differential drive robot schematic top view. The z-axis is pointing out of the sheet. The robot`s moving coordinates frame is placed in the middle point between the wheels axle. \{s\} is a static frame of reference.}
+    \label{fig:diff-drive-schematic}
+\end{figure}
+
+\subsection{The differential drive kinematics}
+Let's first define the robot state by a state vector $\mathbf{x}$, Eq. \ref{eq:diff-drive-state-vector}, composed by the robot's heading and position.
+
+\begin{equation}
+    \mathbf{x} = \begin{bmatrix}
+        \phi \\ x \\ y 
+    \end{bmatrix}
+    \label{eq:diff-drive-state-vector}
+\end{equation}
+
+The goal is to derive a model that relates the wheel velocities (inputs), in \si[per-mode=symbol]{\radian\per\second}, to the vector representing the robot's state. Something with the shape of Eq. \ref{eq:diff-drive-generic-model}. Where $\mathbf{u}$ is the input vector.
+\begin{equation}
+    \mathbf{\dot{x}} = \boldsymbol{g}\left( \begin{bmatrix}
+        g_1(\mathbf{x}, \mathbf{u}) \\ g_2(\mathbf{x}, \mathbf{u}) \\ g_3(\mathbf{x}, \mathbf{u})\end{bmatrix} \right)
+    \label{eq:diff-drive-generic-model}
+\end{equation}
+
+The input vector is the pair $(u_L, u_R)$, the angular velocities of the left and right wheels, respectively. The velocities signs are defined in a way that when both are positive, the robot moves in the x-axis positive direction of its own coordinate frame. The wheels linear velocities is given by Eq. \ref{eq:diff-drive-wheels-linear-velocities}, where $r$ is the wheels radius.
+
+\begin{equation}
+\begin{cases}
+    \lVert \vec{\mathrm{v}}_L \rVert = u_L \cdot r\\
+    \lVert \vec{\mathrm{v}}_R \rVert = u_R \cdot r
+\end{cases}
+    \label{eq:diff-drive-wheels-linear-velocities}
+\end{equation}
+
+From now on, all the calculations will be made in the robot coordinates frame. The axle middle point is the robot position. One also must know the relation between linear and angular speeds in Eq. \ref{eq:angular-linear-speed}.
+
+\begin{equation}
+    V = \omega R
+    \label{eq:angular-linear-speed}
+\end{equation}
+
+\noindent where
+\begin{description}[labelindent=10pt, labelsep=10pt]
+    \item[$V$] is the linear speed
+    \item[$\omega$] is rotation speed, aka the angular speed
+    \item[$R$] is the radius of rotation
+\end{description}
+
+First, I will derive the robot linear velocity in function of the wheels velocities. By Figure \ref{fig:diff-drive-schematic} it is clear that any wheel displacement will make the middle point translates in the $\hat{y}_\mathsmaller{R}$ direction, therefore we have that $\dot{y} = 0$. The linear velocity in the $\hat{x}_\mathsmaller{R}$ direction is given by Eq. \ref{eq:diff-drive-x-velocity},
+
+\begin{equation}
+\begin{aligned}
+    \dot{x} &= \frac{1}{2} \,(\mathrm{v}_R + \mathrm{v}_L)\\
+    &= \frac{r}{2} \,(u_R + u_L)
+\end{aligned}
+    \label{eq:diff-drive-x-velocity}
+\end{equation}
+
+to see that, just observe that when one wheel is stopped and the other is spinning the middle point linear velocity will be half of the point in the wheel, because the middle point will describe a circle with half the radius of the circle described by the spinning wheel point around the stopped wheel. Then, just sum the contribution of each wheel.
+
+Now the angular velocity, just as with the linear velocity, I will analyse the contribution of each wheel and then, sum the effects. When the right wheel spins, the midpoint, $\boldsymbol{m}$ in Fig. \ref{fig:diff-drive-schematic}, rotates in the counterclockwise direction around the left wheel with linear velocity $\dfrac{\mathrm{v}_R}{2}$ and radius $d$. Therefore the angular velocity contribution of the right wheel is $\dot{\phi}_R = \dfrac{\mathrm{v}_R}{2\,d}$, in the counterclockwise direction. The contribution of the left wheel is analogous, but when it spins forward, the middle point moves clockwise around the right wheel, since I am adopting the right-handed coordinates system, the clockwise sense is negative and the counterclockwise is positive. The robot angular velocity is given by Eq. \ref{eq:diff-drive-angular-velocity}
+
+\begin{equation}
+\begin{aligned}
+    \dot{\phi} &= \dot{\phi}_R + \dot{\phi}_L\\
+    &= \frac{\mathrm{v}_R}{2\,d} - \frac{\mathrm{v}_L}{2\,d}\\
+    &= \frac{r}{2\,d} \, (u_R - u_L)
+\end{aligned}
+\label{eq:diff-drive-angular-velocity}
+\end{equation}
+
+Wrapping everything matrix form, we end up with Eq. \ref{eq:conituous-diff-drive-model-in-robot-frame}
+
+\begin{equation}
+    \begin{bmatrix}
+        \dot{\phi} \\ \dot{x} \\ \dot{y}
+    \end{bmatrix}_{\{\mathrm{R}\}}= \begin{bmatrix}
+        -r/2d & r/2d \\
+        r/2 & r/2 \\
+        0 & 0 \\
+    \end{bmatrix} \begin{bmatrix} u_L \\ u_R \end{bmatrix}
+    \label{eq:conituous-diff-drive-model-in-robot-frame}
+\end{equation}
+
+Equation \ref{eq:conituous-diff-drive-model-in-robot-frame} is expressed in the robot frame, that is moving with it. To express it with respect to a static frame, as depicted in Fig. \ref{fig:diff-drive-schematic}, we need to write the linear velocities in terms of the static frame base vectors. Equation \ref{eq:robot-to-static-frame-transform} gives the basis change matrix from the robot frame to the static frame.
+
+\begin{equation}
+    \boldsymbol{R_{\mathsmaller{\mathrm{SR}}}} = \begin{bmatrix}
+        1 & 0 & 0 \\
+        0 & \cos\phi & -\sin\phi \\
+        0 & \sin\phi & \cos\phi \\
+    \end{bmatrix}
+    \label{eq:robot-to-static-frame-transform}
+\end{equation}
+
+One must remember that the z-axis of both frames is pointing out of the sheet, that's why the first column is $\begin{bmatrix} 1 & 0 & 0 \end{bmatrix}^T$. Using Eq. \ref{eq:conituous-diff-drive-model-in-robot-frame} and \ref{eq:robot-to-static-frame-transform} we obtain Eq. \ref{eq:continuous-diff-drive-model} which is the robot dynamic model in the static frame. Note that this is a nonlinear model, since we have sine and cosine function of the robot heading, one of the system's states.
+
+\begin{equation}
+    \begin{aligned}
+    \begin{bmatrix}
+        \dot{\phi} \\ \dot{x} \\ \dot{y}
+    \end{bmatrix}_{\{\mathrm{S}\}} &= \boldsymbol{R_{\mathsmaller{\mathrm{SR}}}} \begin{bmatrix}
+         \dot{\phi} \\ \dot{x} \\ \dot{y}
+    \end{bmatrix}_{\{\mathrm{R}\}} \\
+    &= \begin{bmatrix}
+        -r/2d & r/2d \\
+        (r/2)\cos\phi & (r/2)\cos\phi \\
+        (r/2)\sin\phi & (r/2)\sin\phi
+    \end{bmatrix}  \begin{bmatrix} u_L \\ u_R \end{bmatrix}
+    \end{aligned}
+    \label{eq:continuous-diff-drive-model}
+\end{equation}
+
+To use this model with the Kalman Filter, we need to linearize it around 
+the predicted state and then discretize the model.
+
+\subsection{From The Continuouns To The Discrete System}
+When one has a continuous system and wants to discretize it there is two ways: The first is to first linearize the model about a nominal trajectoty or equilibrium point and then discretize exactly, resulting in a linear and discrete model. The other one is to just make an approximate discretization, using forward Euler method, for example. In the following both methods will be derived for the differential drive model.
+
+\subsubsection{Linearization and Discretization}
+\noindent\textbf{Model Linearization} \\
+One way of linearizing a nonlinear dynamic model is through its Taylor Series Expansion around some nominal trajectory $(\boldsymbol{\mathbf{x}}, \mathbf{\bar{u}})$. Equation \ref{eq:first-order-taylor-approximation} is the first order Taylor approximation of a function $\boldsymbol{g}(\mathbf{x}, \mathbf{u})$ around $(\mathbf{\bar{x}, \bar{u}})$.
+
+\begin{equation}
+    \boldsymbol{g}(\mathbf{x}, \mathbf{u}) \approx \boldsymbol{g}(\mathbf{\bar{x}}, \mathbf{\bar{u}}) + \diffp{\mathbf{g}(\mathbf{x}, \mathbf{u})}{{\mathbf{x}}}\bigg\rvert_{(\mathbf{\bar{x}}, \mathbf{\bar{u}})} (\mathbf{x} - \mathbf{\bar{x}}) + \diffp{\mathbf{g}(\mathbf{x}, \mathbf{u})}{{\mathbf{u}}}\bigg\rvert_{(\mathbf{\bar{x}}, \mathbf{\bar{u}})} (\mathbf{u} - \mathbf{\bar{u}})
+    \label{eq:first-order-taylor-approximation}
+\end{equation}
+
+In the Extended Kalman Filter, the model is linearized around the estimated state $\mathbf{\hat{x}_{k, k}}$ and the input $\mathbf{u_k}$. Here the hat symbol is used to refer to the estimated state, please do not confuse with when it is used to represent unit vectors. Rewriting Eq. \ref{eq:first-order-taylor-approximation} around $(\mathbf{\hat{x}_{k,k}}, \mathbf{u_k})$, we have Eq. \ref{eq:linearization-around-estimated-state}.
+
+\begin{equation}
+    \mathbf{\dot{x}} \approx \boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) + \underbrace{\diffp{\mathbf{g}(\mathbf{x}, \mathbf{u})}{{\mathbf{x}}}}_{\mathbf{A_c}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k})}\bigg\rvert_{(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k})} (\mathbf{x} - \mathbf{\hat{x}_{k, k}}) + \underbrace{\diffp{\mathbf{g}(\mathbf{x}, \mathbf{u})}{{\mathbf{u}}}}_{\mathbf{B_c}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k})}\bigg\rvert_{(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k})} (\mathbf{u} - \mathbf{u_k})
+     \label{eq:linearization-around-estimated-state}
+\end{equation}
+
+Using the model in Eq. \ref{eq:continuous-diff-drive-model}, we get the following state matrix, Eq. \ref{eq:state-matrix-around-estimated-state}.
+
+\renewcommand{\arraystretch}{1.5}
+\begin{equation}
+    \mathbf{A_c}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) = \diffp{\mathbf{g}(\mathbf{x}, \mathbf{u})}{{\mathbf{x}}}\bigg\rvert_{(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k})} = \begin{bmatrix}
+        0 & 0 & 0\\
+        -\dfrac{r}{2}\sin\hat{\phi}_{k,k} (u_{L_k} + u_{R_k}) & 0 & 0\\
+        \dfrac{r}{2}\cos\hat{\phi}_{k,k} (u_{L_k} + u_{R_k}) & 0 & 0\\
+    \end{bmatrix}
+    \label{eq:state-matrix-around-estimated-state}
+\end{equation}
+
+Now, all that is left is the model discretization.
+
+\noindent\textbf{Model Discretization}\\
+A common assumption when control by computer is employed, is that the input signal is constant between the control interval, also known as sampling time. 
+
+\begin{equation}
+    \diffp{\mathbf{u}(t)}{t} = 0 \text{, } kT_s \leq t < (k+1)T_s
+\end{equation}
+
+This fact enables us to derive a linear discrete dynamics from the linear continuous dynamics in Eq. \ref{eq:linearization-around-estimated-state}. In the following, I will refer to the matrix $\mathbf{A_c}(\mathbf{\hat{x}_{k,k}}, \mathbf{u_k})$ as $\mathbf{A_c}$ and to $\mathbf{B_c}(\mathbf{\hat{x}_{k,k}}, \mathbf{u_k})$ as $\mathbf{B_c}$,
+\begin{equation*}
+\begin{aligned}
+    \mathbf{\dot{x}}(t) &\approx \boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) + \mathbf{A_c}(\mathbf{x}(t) - \mathbf{\hat{x}_{k, k}}) + \mathbf{B_c} (\mathbf{u}(t) - \mathbf{u_k})\\
+    \mathbf{\dot{x}} &\approx \mathbf{A_c}\mathbf{x}(t) + \mathbf{B_c} \mathbf{u}(t) + \underbrace{\boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) - \mathbf{A_c \hat{x}_{k,k} - B_c u_k}}_{\text{constant}} \\
+    \mathbf{\dot{x}} - \mathbf{A_c}\mathbf{x}(t) &\approx \mathbf{B_c} \mathbf{u}(t) + \boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) - \mathbf{A_c \hat{x}_{k,k} - B_c u_k}\\
+    e^{\mathbf{-A_c} t} \cdot (\mathbf{\dot{x}} - \mathbf{A_c}\mathbf{x}(t)) &\approx e^{\mathbf{-A_c} t} \cdot (\mathbf{B_c} \mathbf{u}(t) + \boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) - \mathbf{A_c \hat{x}_{k,k} - B_c u_k}) \\
+    \diffp{}{t} \left(e^{\mathbf{-A_c} t}\,\mathbf{x}(t) \right) &\approx e^{\mathbf{-A_c} t} \cdot (\mathbf{B_c} \mathbf{u}(t) + \boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) - \mathbf{A_c \hat{x}_{k,k} - B_c u_k}) \\
+    \int_{kT_s}^{(k+1)T_s} \diffp{}{t} \left(e^{\mathbf{-A_c} t}\,\mathbf{x}(t) \right) dt &\approx \int_{kT_s}^{(k+1)T_s} e^{\mathbf{-A_c} t} \cdot (\mathbf{B_c} \mathbf{u}(t) + \boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) - \mathbf{A_c \hat{x}_{k,k} - B_c u_k}) dt \\
+    \\
+    \begin{aligned}
+        & e^{\mathbf{-A_c} (k+1)T_s} \, \mathbf{x}((k+1)T_s) - \dots \\ 
+        & - e^{\mathbf{-A_c}kT_s} \, \mathbf{x}(kT_s)
+    \end{aligned} \, &\approx \, \begin{aligned}
+    &\int_{kT_s}^{(k+1)T_s} e^{\mathbf{-A_c} t} \mathbf{B_c} \underbrace{\mathbf{u}(t)}_{\text{constant}}dt \,+ \dots \, \\ &\int_{kT_s}^{(k+1)T_s} e^{\mathbf{-A_c} t} (\boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) - \mathbf{A_c \hat{x}_{k,k} - B_c u_k})dt \end{aligned} \\
+    \\
+    e^{\mathbf{-A_c} (k+1)T_s} \, \mathbf{x}((k+1)T_s) \, &\approx \, 
+    \begin{aligned}
+         e^{\mathbf{-A_c}kT_s} \, \mathbf{x}(kT_s) & + \left(\int_{kT_s}^{(k+1)T_s} e^{\mathbf{-A_c} t} dt \right) \, ( \mathbf{B_c}\,\mathbf{u}(kT_s) \,+ \dots\\ 
+        &\boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) - \mathbf{A_c \hat{x}_{k,k} - B_c u_k} ) \end{aligned} \\
+\end{aligned}
+\end{equation*}
+
+for the sake of readability, I will write $\mathbf{x}((k+1)T_s)$ as $\mathbf{x_{k+1}}$, $\mathbf{x}(kT_s)$ as $\mathbf{x_k}$, and $\mathbf{u}(kT_s)$ as $\mathbf{u_k}$, 
+
+\begin{equation*}
+    e^{\mathbf{-A_c} (k+1)T_s} \, \mathbf{x_{k+1}} \, \approx e^{\mathbf{-A_c}kT_s} \, \mathbf{x_k} + \left(\int_{kT_s}^{(k+1)T_s} e^{\mathbf{-A_c} t} dt \right) \, ( \cancel{\mathbf{B_c}\,\mathbf{u_k}} \,+ \boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) - \mathbf{A_c \hat{x}_{k,k}} - \cancel{\mathbf{B_c u_k}} ) 
+\end{equation*}
+
+multiplying both sides by the inverse of $e^{\mathbf{-A_c} (k+1)T_s}$, which is $e^{\mathbf{A_c} (k+1)T_s}$ (see Eq. \ref{}),
+
+\begin{equation} \begin{aligned}
+    \mathbf{x_{k+1}} \, &\approx e^{\mathbf{A_c}T_s} \, \mathbf{x_k} + \left(\int_{kT_s}^{(k+1)T_s} e^{\mathbf{A_c}((k+1)T_s - t)} dt \right) \, (\boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) - \mathbf{A_c \hat{x}_{k,k} } )\\
+    &\approx e^{\mathbf{A_c}T_s} \, \mathbf{x_k} + \left(\int_{0}^{T_s} e^{\mathbf{A_c}\tau} d\tau \right) \, (\boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) - \mathbf{A_c \hat{x}_{k,k}}) \\
+    &\approx  \underbrace{e^{\mathbf{A_c}T_s}}_{\mathbf{A_d}} \mathbf{x_k} + \left(\int_{0}^{T_s} e^{\mathbf{A_c}\tau} d\tau\right) (\boldsymbol{g}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k}) - \mathbf{A_c \hat{x}_{k,k}})
+\end{aligned}
+\label{eq:discrete-linearized-system-around-estimated state}
+\end{equation}
+
+\noindent Some things to be reminded.
+\begin{description}[labelindent=10pt, labelsep=10pt]
+    \item $T_s$ is the interval between two control inputs
+    \item $\mathbf{x_k}$ is the same as $\mathbf{x}(kT_s)$
+    \item $\mathbf{u_k}$ is the same as $\mathbf{u}(kT_s)$
+    \item $\mathbf{\hat{x}_{k, k}}$ is the filter estimation of the state $\mathbf{x}_k$
+    \item $\mathbf{A_c}$ is the $\mathbf{A_c}(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k})$ matrix from Eq. \ref{eq:linearization-around-estimated-state}, which is the jacobian of $\boldsymbol{g}(\mathbf{x}, \mathbf{u})$ with respect to $\mathbf{x}$ in $(\mathbf{\hat{x}_{k, k}}, \mathbf{u_k})$
+\end{description}
+
+With the continuous state matrix obtained in \ref{eq:state-matrix-around-estimated-state}, using the matrix exponential definition in Eq. \ref{eq:taylor-e-of-A} and noting that this particular matrix squared is null, Eq. \ref{eq:discrete-state-matrix-around-estimated-state} gives the discrete state matrix.
+
+\begin{equation}
+    e^{\mathbf{A_c} T_s} = \exp\left(\begin{bmatrix}
+        0 & 0 & 0\\
+        -\dfrac{r}{2}\sin\hat{\phi}_{k,k} (u_{L_k} + u_{R_k}) & 0 & 0\\
+        \dfrac{r}{2}\cos\hat{\phi}_{k,k} (u_{L_k} + u_{R_k}) & 0 & 0\\
+    \end{bmatrix} T_s\right) = \begin{bmatrix}
+        1 & 0 & 0\\
+        -\dfrac{r}{2}\sin\hat{\phi}_{k,k} (u_{L_k} + u_{R_k}) T_s & 1 & 0\\
+        \dfrac{r}{2}\cos\hat{\phi}_{k,k} (u_{L_k} + u_{R_k}) T_s & 0 & 1\\
+    \end{bmatrix}
+    \label{eq:discrete-state-matrix-around-estimated-state}
+\end{equation}
+
+Equation \ref{eq:state-matrix-integral} is the integral of $\exp\left(\mathbf{A_c}\tau\right)$ from 0 to $T_s$.
+
+\begin{equation}
+    \int_{0}^{T_s} e^{\mathbf{A_c}\tau} d\tau  = \begin{bmatrix}
+        T_s & 0 & 0\\
+        -\dfrac{r\, T_s^2}{4}\sin\hat{\phi}_{k,k} (u_{L_k} + u_{R_k}) & T_s & 0\\
+        \dfrac{r\, T_s^2}{4}\cos\hat{\phi}_{k,k} (u_{L_k} + u_{R_k}) & 0 & T_s\\
+    \end{bmatrix}
+    \label{eq:state-matrix-integral}
+\end{equation}
+\renewcommand{\arraystretch}{1}
+
+\subsubsection{Discretization through approximation}
+Another method to discretize a continuous model is to use the forward Euler approximation, this approximation can be obtained by the manipulation of the Taylor series expansion of a function $y(\cdot)$ around some point $t_0$.
+
+\begin{equation}
+\begin{aligned}
+    y(t) &= \sum_{n=0}^\infty \diffp[n]{y(t)}{t}\Bigg\lvert_{t_0} \, \frac{(t - t_0)^n}{n!} \\
+    &= y(t_0) + y'(t_0)\,(t - t_0) + \text{\textit{high order terms}}
+\end{aligned}
+\end{equation}
+
+Ignoring the high order terms, we get the following approximation:
+
+\begin{equation}
+    y(t) \approx y(t_0) + y'(t_0)\,(t-t_0)
+\end{equation}
+
+Rewriting the above equation with $h = t - t_0$, we obtain the first order approximation to the derivative at the point $t_0$
+
+\begin{equation}
+\begin{aligned}
+    y(t_0 + h) &\approx y(t_0) + y'(t_0)\,h\\
+    y'(t_0) &\approx \frac{y(t_0 + h) - y(t_0)}{h}
+\end{aligned}
+\label{eq:derivative-first-order-approximation}
+\end{equation}
+
+So, with Eq. \ref{eq:derivative-first-order-approximation} we can take the continuous time model in Eq. \ref{eq:diff-drive-generic-model} and obtain its discrete first order approximation
+
+\begin{equation*}
+    \underbrace{\mathbf{\dot{x}}(kT_s)}_{\boldsymbol{g}(\mathbf{x}(kT_s), \mathbf{u}(kT_s))} \approx \frac{\mathbf{x}(kT_s + T_s) - \mathbf{x}(kT_s)}{T_s}
+\end{equation*}
+
+writing $\mathbf{x}(kT_s)$ and $\mathbf{x}(kT_s + T_s)$ as $\mathbf{x_k}$ and $\mathbf{x_{k+1}}$, we get Eq. \ref{eq:discrete-nonlinear-model}
+\begin{equation}
+    \begin{aligned}
+    \boldsymbol{g}(\mathbf{x_k, u_k}) &\approx \frac{\mathbf{x_{k+1} - x_k}}{T_s} \\
+    \mathbf{x_{k+1}} &\approx \mathbf{x_k} + T_s \, \boldsymbol{g}(\mathbf{x_k, u_k})
+    \end{aligned}
+\label{eq:discrete-nonlinear-model}
+\end{equation}
+
+where $T_s$ is the sampling period or step size.
+
+With the above expression, we get the following discrete differential drive kinematics from Eq. \ref{eq:conituous-diff-drive-model-in-robot-frame}
+
+\renewcommand{\arraystretch}{1.5}
+\begin{equation}
+\begin{aligned}
+    \begin{bmatrix}
+        \phi_{k+1} \\ x_{k+1} \\ y_{k+1}
+    \end{bmatrix} &\approx 
+    \begin{bmatrix}
+        \phi_k \\ x_k \\ y_k
+    \end{bmatrix} + 
+    T_s \, \begin{bmatrix}
+        -r/2d & r/2d \\
+        (r/2)\cos\phi_k & (r/2)\cos\phi_k \\
+        (r/2)\sin\phi_k & (r/2)\sin\phi_k
+    \end{bmatrix}  
+    \begin{bmatrix} u_{L_k} \\ u_{R_k} \end{bmatrix} \\
+    \mathbf{x_{k+1}} &\approx 
+    \begin{bmatrix}
+        \phi_k \\ x_k \\ y_k
+    \end{bmatrix} + 
+    \begin{bmatrix}
+        -r/2d & r/2d \\
+        (r/2)\cos\phi_k & (r/2)\cos\phi_k \\
+        (r/2)\sin\phi_k & (r/2)\sin\phi_k
+    \end{bmatrix}  
+    \begin{bmatrix} \cancelto{\Delta\theta_{L_k}}{T_s\,u_{L_k}} \\ \cancelto{\Delta\theta_{R_k}}{T_s\,u_{R_k}} \end{bmatrix} \\
+    \mathbf{x_{k+1}} &\approx
+    \begin{bmatrix}
+        \phi_k - \dfrac{r}{2d}\,\Delta\theta_{L_k} + \dfrac{r}{2d}\,\Delta\theta_{R_k} \\
+        x_k + \dfrac{r}{2} \cos(\phi_k) \, \Delta\theta_{L_k} + \dfrac{r}{2} \cos(\phi_k) \, \Delta\theta_{R_k} \\
+        y_k + \dfrac{r}{2} \sin(\phi_k) \, \Delta\theta_{L_k} + \dfrac{r}{2} \sin(\phi_k) \, \Delta\theta_{R_k} \\
+    \end{bmatrix}
+\end{aligned}
+\end{equation}
+\renewcommand{\arraystretch}{1}
+
+\subsection{Another differential drive model}
+\renewcommand{\arraystretch}{1.5}
+\begin{equation}
+    \mathbf{x_{k+1}} = \begin{bmatrix}
+        \phi_k \\ x_k \\ y_k
+    \end{bmatrix} + 
+    \begin{bmatrix}
+        \dfrac{r}{2d}\,\Delta\theta_{L_k} - \dfrac{r}{2d} \,\Delta\theta_{R_k} \\
+        \dfrac{\Delta\theta_{R_k} + \Delta\theta_{L_k}}{\Delta\theta_{R_k} - \Delta\theta_{L_k}}\left( \sin(\phi_k + \alpha) - \sin(\phi_k) \right) \\
+        \dfrac{\Delta\theta_{R_k} + \Delta\theta_{L_k}}{\Delta\theta_{R_k} - \Delta\theta_{L_k}}\left( -\cos(\phi_k + \alpha) + \cos(\phi_k) \right) 
+    \end{bmatrix}
+\end{equation}
+\renewcommand{\arraystretch}{1}
+
+\section{The Range-Bearing measurements}
+\subsection{The Range-Bearing measurement direct model}
+\begin{figure}[h]
+    \centering
+    \input{figs/range-bearing}
+    \caption{The Range-Bearing measurement scheme. The robot frame is represented in magenta, the sensor frame in blue. The measurement $(r_j, \theta_j)$ refers to the \textit{jth} landmark in the map.}
+    \label{fig:range-bearing-measurement-schematic}
+\end{figure}
+
+Equation \ref{eq:laser-coords-in-map-frame} is the laser scanner coordinates in the map frame.
+\begin{equation}
+    \begin{cases}
+    x_l = x + d\,\cos\phi \\
+    y_l = y + d\,\sin\phi 
+    \end{cases}
+    \label{eq:laser-coords-in-map-frame}
+\end{equation}
+
+Equation \ref{eq:lidar-measurement-model} is the range-bearing measurement model of the \textit{jth} landmark. That is, the measurement that should be obtained if the estimated system state was exactly $\mathbf{x}$, in other words, if the estimated state was equal the true state.
+\renewcommand{\arraystretch}{1.5}
+\begin{equation}
+    \mb{h_j}(\mathbf{x}) = \begin{bmatrix}
+        r_j \\ \theta_j     
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        \sqrt{(m_{j,x} - x_l)^2 + (m_{j, y} - y_l)^2} \\
+        \arctan\left(\dfrac{m_{j,y} - y_l}{m_{j,x} - x_l}\right) - \phi
+    \end{bmatrix}
+    \label{eq:lidar-measurement-model}
+\end{equation}
+\renewcommand{\arraystretch}{1.0}
+
+\subsubsection{Direct Model Linearization}
+In order to use the non-linear model described in the previous section with the Kalman or Information filters, it must be linearized. Equation \ref{eq:lidar-model-jacobian} is the jacobian of Eq. \ref{eq:lidar-measurement-model}.
+
+\renewcommand{\arraystretch}{1.5}
+\begin{equation}
+    \diffp[]{}{\bvec{x}} \mb{h_j}(\bvec{x}) = \begin{bmatrix}
+        \begin{bmatrix}
+            \dfrac{d}{r_j}\parentheses{\delta_x \sin\phi - \delta_y \cos\phi} &  -\dfrac{\delta_x}{r_j} & -\dfrac{\delta_y}{r_j}\\
+            -\dfrac{d}{r_j^2}\parentheses{\delta_y \sin\phi + \delta_x \cos\phi} - 1 & \dfrac{\delta_y}{r_j^2} & -\dfrac{\delta_x}{r_j^2}
+        \end{bmatrix} &
+        \matnull{2}{2(j-1)} &
+        \begin{bmatrix}
+            \dfrac{\delta_x}{r_j} & \dfrac{\delta_y}{r_j} \\
+            -\dfrac{\delta_y}{r_j^2} & \dfrac{\delta_x}{r_j^2}
+        \end{bmatrix} &
+        \matnull{2}{2(M-j)} 
+    \end{bmatrix} 
+    \label{eq:lidar-model-jacobian}
+\end{equation}
+\renewcommand{\arraystretch}{1.0}
+
+\subsection{The Range-Bearing measurement inverse model}
+A measurement $\bvec{y}_\mb{j}$ is defined as:
+\begin{equation}
+    \bvec{y}_\mb{j} = \begin{bmatrix}
+        r_j \\ 
+        \theta_j \end{bmatrix}
+\end{equation}
+
+\begin{equation}
+    \mb{g_j}(\bvec{x}, \bvec{y}_\mb{j}) = 
+    \begin{bmatrix}
+        m_{j, x} \\
+        m_{j, y} \\
+    \end{bmatrix} =
+    \begin{bmatrix}
+        x_l + r_j \cos(\phi + \theta_j)\\
+        y_l + r_j \sin(\phi + \theta_j) 
+    \end{bmatrix}
+    \label{eq:measurement-inverse-model}
+\end{equation}
+
+\begin{equation}
+    \diffp[]{}{\bvec{x}} \mb{g_j}(\bvec{x}, \bvec{y}_\mb{j}) = \begin{bmatrix}\begin{bmatrix}
+        -d \sin{\phi_j} - r_j \sin(\phi + \theta_j)  & 1 & 0\\
+        d\cos{\phi} + r_j\cos(\phi + \theta_j) & 0 & 1
+    \end{bmatrix} & \matnull{2}{2M}\end{bmatrix}
+\end{equation}
+
+\section{EKF SLAM}
+\blue{\textbf{TODO}}
+
+\subsection{Landmark Initialization}
+When the robot sees a new landmark, we can expect that the estimation error of this new landmark has to account the robot positioning error and the sensor error. It is not fair to initialize it with $\inf$ like \cite[p.~ ]{bongard2006probabilistic} says so, because the robot already have a guess about where it is when it makes the new observation, so the error can not be $\inf$.
+
+\section{Appendix}
+\subsection{Properties of the inverse matrix}
+\begin{enumerate}
+    \item For any $n\times n$ invertible matrices $\mat{A}$ and $\mat{B}$, the following holds true:
+    \begin{equation}
+        \mat{A^{-1}} \mat{B^{1}} = \left(\mat{B A}\right)^{-1}
+    \end{equation}
+    this is true because
+    \begin{equation*}
+    \begin{aligned}
+        \mat{A^{-1}}\mat{B^{-1}}\mat{B A} &= \mat{I}\\
+        \mat{A^{-1}}\mat{B^{-1}}\parentheses{\mat{B A}} &= \mat{I}\\
+        \mat{A^{-1}}\mat{B^{-1}}\parentheses{\mat{B A}}\magenta{\parentheses{\mat{B A}}^{-1}} &= \mat{I}\magenta{\parentheses{\mat{B A}}^{-1}} \\
+        \mat{A^{-1}} \mat{B^{1}} = \left(\mat{B A}\right)^{-1}
+    \end{aligned}
+    \end{equation*}
+\end{enumerate}
+
+
+
+\subsection{Sherman/Morrison formula}
+The Sherman/Morrison formula, also known as the specialized inversion lemma, is stated below from \cite[p.~50]{bongard2006probabilistic}
+
+\begin{lem}
+For any invertible quadratic matrices $\mat{R}$ and $\mat{Q}$ and any matrix $\mat{P}$ with appropriate dimensions, the following holds true:
+\begin{equation}
+\parentheses{\mat{R} + \mat{PQ}\matT{P}}^\mathbf{{-1}} = \mat{R^{-1}} - \mat{R^{-1}}\mat{P}\parentheses{\mat{Q^{-1}} + \matT{P}\mat{R^{-1}P}}^\mathbf{{-1}}\matT{P}\mat{R^{-1}}
+\end{equation}
+assuming that all above matrices can be inverted as stated.
+
+\begin{proof}
+Define $\mat{\Psi} = \parentheses{\mat{Q^{-1}} + \matT{P}\mat{R^{-1}}\mat{P}}^\mathbf{-1}$. It suffices to show that
+\begin{equation*}
+\parentheses{\mat{R^{-1}} - \mat{R^{-1}}\mat{P}\mat{\Psi}\matT{P}\mat{R^{-1}}} \parentheses{\mat{R} + \mat{PQ}\matT{P}} = \mat{I}
+\end{equation*}
+this is shown through a series of manipulations:
+\begin{equation}
+\begin{aligned}
+    &= \blue{\mat{R^{-1} R}} + \mat{R^{-1} P Q P^T} - \mat{R^{-1} P \Psi P^T \magenta{R^{-1} R}} - \mat{R^{-1} P \Psi P^T R^{-1} P Q P^T} \\
+    &= \blue{\mat{I}} + \mat{R^{-1} P Q P^T} - \mat{R^{-1} P \Psi P^T \magenta{I}} - \mat{R^{-1} P \Psi P^T R^{-1} P Q P^T}\\
+    &= \mat{I} + \mat{\magenta{R^{-1} P} Q P^T} - \mat{\magenta{R^{-1} P} \Psi P^T} - \mat{\magenta{R^{-1} P} \Psi P^T R^{-1} P Q P^T}\\
+    &= \mat{I} + \mat{R^{-1} P} \left[\mat{Q P^T} - \mat{\Psi P^T} - \mat{\Psi P^T R^{-1} P Q P^T}\right]\\
+    &= \mat{I} + \mat{R^{-1} P} \left[\mat{Q P^T} - \mat{\Psi \blue{Q^{-1} Q} P^T} - \mat{\Psi P^T R^{-1} P Q P^T}\right]\\
+    &= \mat{I} + \mat{R^{-1} P} \left[\mat{Q P^T} - \mat{\magenta{\Psi} Q^{-1}\blue{ Q P^T}} - \mat{\magenta{\Psi} P^T R^{-1} P \blue{Q P^T}}\right]\\
+    &= \mat{I} + \mat{R^{-1} P} \left[\mat{Q P^T} - \mat{\magenta{\Psi}} \left(\mat{ Q^{-1}} - \mat{P^T R^{-1} P}\right)\mat{\blue{Q P^T}}\right]\\
+    &= \mat{I} + \mat{R^{-1} P} \left[\mat{Q P^T} - \mat{\Psi} \blue{\left(\mat{ Q^{-1}} - \mat{P^T R^{-1} P}\right)}\mat{Q P^T}\right]\\
+    &= \mat{I} + \mat{R^{-1} P} \left[\mat{Q P^T} - \mat{\Psi} \blue{\mat{\Psi^{-1}}}\mat{Q P^T}\right]\\
+    &= \mat{I} + \mat{R^{-1} P} \left[\mat{Q P^T} - \mat{Q P^T}\right]\\
+    &= \mat{I} 
+\end{aligned}
+\end{equation}
+
+\end{proof}
+\label{lem:inversion-lemma}
+
+\end{lem}
+
+\bibliographystyle{plain}
+\bibliography{main}
+\end{document}

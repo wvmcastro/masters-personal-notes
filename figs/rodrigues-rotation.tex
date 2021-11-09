@@ -1,0 +1,51 @@
+\documentclass{standalone}
+
+\usepackage{tikz,tikz-3dplot, tkz-euclide}
+\usetikzlibrary{arrows.meta}
+\tikzset{>={Latex[round]}}
+\usepackage{mathtools} %lVert rVert
+
+\begin{document}
+
+% \tdplotsetmaincoords{theta_d}{fi_d}
+% theta_d -> rotation around x axis
+% fi_d -> rotation around z axis
+% (0, 0) is the default orietantion, where x points right, y points up and 
+% z points out of the page
+\tdplotsetmaincoords{60}{135}
+\begin{tikzpicture}[tdplot_main_coords, thick, scale=1.5]
+    \coordinate (Origin) at (0, 0, 0);
+    \draw[->] (Origin)  -- (1, 0, 0);
+    \draw[->] (Origin) -- (0, 1, 0);
+    \draw[->] (Origin) -- (0, 0, 1);
+    
+    % rotation axis
+    \coordinate (omega) at (-1, 4, 2);
+    \draw[very thick, ->, green!50!black] (Origin) -- (omega) node[anchor=west] {$\hat{\omega}$};
+    % vector p at t=0
+    \coordinate (Pzero) at (0.75, 3, 1.125);
+    \draw[very thick, ->, blue] (Origin) -- (Pzero) node[anchor=north east] {$p(0)$};
+    % vector p at t=\theta
+    \coordinate (Ptheta) at (-0.31553031, 1.99860661, 2.59502163);
+    \draw[very thick, ->, blue] (Origin) -- (Ptheta) node[anchor=south ] {$p(\theta)$};
+    
+    % projection lines
+    \coordinate (Pint) at (-0.64285714, 2.57142857, 1.28571429);
+    \draw[-] (0.75, 3, 1.125) -- (Pint) node[midway, below, sloped] {$\lVert \vec{p} \rVert \sin{\phi}$};
+    \draw[-] (-0.31553031, 1.99860661, 2.59502163) -- (Pint);
+    
+    % draw right angles
+    \tkzMarkRightAngle[size=0.20, darkgray](Origin,Pint,Pzero);
+    \tkzMarkRightAngle[size=0.20, darkgray](Ptheta,Pint,Origin);
+    
+    % draw theta arc
+    \tdplotdefinepoints(-0.64285714, 2.57142857, 1.28571429)(0.75, 3, 1.125)(-0.31553031, 1.99860661, 2.59502163)
+    \tdplotdrawpolytopearc[dashed]{1.466135591079001}{}{}
+    \tdplotdrawpolytopearc[->, darkgray]{0.7}{anchor=south east}{$\theta$}
+    
+    % draw phi arc (origin)(omega)(Pzero)
+    \tdplotdefinepoints(0, 0, 0)(0.75, 3, 1.125)(-1, 4, 2)
+    \tdplotdrawpolytopearc[thin]{0.75}{anchor=west}{$\phi$}
+\end{tikzpicture}
+
+\end{document}
