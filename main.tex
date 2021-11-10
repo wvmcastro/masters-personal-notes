@@ -22,10 +22,12 @@
 \usepackage{mdframed}
 \newmdtheoremenv{lem}{Lemma}
 
-\newcommand{\bvec}[1]{\mathbf{#1}} % bold vector
-\newcommand{\bvecT}[1]{\mathbf{#1^T}} % bold vector transposed
-\newcommand{\mat}[1]{\mathbf{#1}}
-\newcommand{\matT}[1]{\mathbf{#1^T}}
+\usepackage{xstring} % compare string
+
+\newcommand{\bvec}[1]{\boldsymbol{\mathbf{#1}}} % bold vector
+\newcommand{\bvecT}[1]{\boldsymbol{\mathbf{#1^T}}} % bold vector transposed
+\newcommand{\mat}[1]{\boldsymbol{\mathbf{#1}}}
+\newcommand{\matT}[1]{\boldsymbol{\mathbf{#1^T}}}
 \newcommand{\bel}{\mathop{bel}} % belief
 \newcommand{\given}{\,|\,} % p(a \given b) -> p(a | b)
 \newcommand{\cbrac}[1]{\left\{#1\right\}} % curly brackets
@@ -1182,7 +1184,7 @@ The EKF update equation is given by:
 \end{aligned}
 \end{equation}
 
-The EKF estimated error is:
+The EKF estimate error is:
 \begin{equation}
 \begin{aligned}
     \mb{\tilde\eta}_\mathbf{k} &= \bvec{\tilde{x}_k} - \mb{\tilde{\mu}}_\mathbf{k}\\
@@ -1210,6 +1212,30 @@ The EKF estimated error is:
     &= \parentheses{\mat{I - K_k H_k}} \blue{\bvec{\bar{\tilde{e}}_k}} 
     + \mat{K_k} \mb{\delta}_\mathbf{k}
 \end{aligned}
+\end{equation}
+Again, we want to calculate the estimate error covariance matrix in 
+order to minimize it with respect to the Kalman Gain. Some steps are
+omitted below because it is really analogous to what was done in the
+classic KF in Eq. \ref{eq:kf-estimate-covariance}.
+\begin{equation}
+\begin{aligned}
+    \mat{\tilde{P}_k} &= \expv{\bvec{\tilde{\eta}_k} 
+        \bvecT{\tilde{\eta}_k}}\\
+    &= \expv{\parentheses{(\mat{I - K_k H_k})\bvec{\bar{\tilde{e}}_k}
+    + \mat{K_k}\bvec{\delta_k}} \parentheses{(\mat{I - K_k H_k})
+    \bvec{\bar{\tilde{e}}_k} 
+    + \mat{K_k}\bvec{\delta_k}}^\mathbf{T}}\\
+    &= \expv{\parentheses{(\mat{I - K_k H_k})\bvec{\bar{\tilde{e}}_k}
+    + \mat{K_k}\bvec{\delta_k}} \parentheses{\bvecT{\bar{\tilde{e}}_k}
+    (\mat{I - H_k K_k})^\mathbf{T} 
+    + \bvecT{\delta_k}\matT{K_k}}}\\
+    &= (\mat{I - K_k H_k})\blue{\expv{\bvec{\bar{\tilde{e}}_k} 
+    \bvecT{\bar{\tilde{e}}_k}}}(\mat{I - K_k H_k})^\mathbf{T} 
+    + \mat{K_k}\magenta{\expv{\bvec{\delta_k}} \bvecT{\delta_k}}\matT{K_k}\\
+    &= (\mat{I - K_k H_k})\blue{\mat{\bar{\tilde{P}}_k}}(\mat{I - K_k H_k})^\mathbf{T} 
+    + \mat{K_k}\magenta{\mat{Q_k}}\matT{K_k}
+\end{aligned}
+\label{eq:ekf-estimate-error-covariance}
 \end{equation}
 
 Using Eq. \ref{eq:linearized-system-model} and \ref{eq:linearized-measurement-model}, we have the first order linear approximation for the non-linear system, in Eq. \ref{eq:ekf-system}, below:
