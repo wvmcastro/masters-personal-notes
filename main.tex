@@ -22,7 +22,6 @@
 \usepackage{mdframed}
 \newmdtheoremenv{lem}{Lemma}
 
-\usepackage{xstring} % compare string
 
 \newcommand{\bvec}[1]{\boldsymbol{\mathbf{#1}}} % bold vector
 \newcommand{\bvecT}[1]{\boldsymbol{\mathbf{#1^T}}} % bold vector transposed
@@ -42,6 +41,7 @@
 \newcommand{\mb}[1]{{\boldsymbol{#1}}} %math bold
 \newcommand{\expv}[1]{\mathbb{E}\brac{#1}} % expectation value
 \DeclareMathOperator{\Tr}{Tr}
+\newcommand{\mytr}[1]{\Tr\parentheses{#1}}
 \newcommand{\normal}[2]{\mathcal{N}\parentheses{#1, #2}}
 \newcommand{\eps}{\varepsilon}
 \newcommand{\matnull}[2]{\mat{0}_{#1\times#2}} % null matrix
@@ -923,10 +923,10 @@ Summing it all, our system is described by Eq. \ref{eq:kf-system}
     \end{aligned}
     \label{eq:kf-system}
 \end{equation}
-Since we do not know, exactly, our modeling error $\mb{\varepsilon}_\mathbf{k}$, we can predict the mean of the current state distribution, $\mb{\bar{\mu}}_\mathbf{k}$, using the previous state mean
+Since we do not know, exactly, our modeling error $\mb{\varepsilon}_\mathbf{k}$, we can predict the mean of the current state distribution, $\mb{\overline{\mu}}_\mathbf{k}$, using the previous state mean
 \begin{equation}
     \begin{aligned}
-        \mb{\bar{\mu}}_\mathbf{k} &= \expv{\mat{A_k}\bvec{x_{k-1}} + \mat{B_k}\bvec{u_k} + \mb{\varepsilon}_\mathbf{k}}\\
+        \mb{\overline{\mu}}_\mathbf{k} &= \expv{\mat{A_k}\bvec{x_{k-1}} + \mat{B_k}\bvec{u_k} + \mb{\varepsilon}_\mathbf{k}}\\
         & = \expv{\mat{A_k}\bvec{x_{k-1}} + \mat{B_k}\bvec{u_k}} + \cancelto{\mat{0}}{\expv{\mb{\varepsilon}_\mathbf{k}}}\\
         &= \mat{A_k}\blue{\expv{\bvec{x_{k-1}}}} + \mat{B_k}\bvec{u_k}\\
         &= \mat{A_k}\blue{\mb{\mu}_\mathbf{k-1}} + \mat{B_k}\bvec{u_k}
@@ -934,7 +934,7 @@ Since we do not know, exactly, our modeling error $\mb{\varepsilon}_\mathbf{k}$,
     \label{eq:kf-prdiction}
 \end{equation}
 
-A good thing to know is how wrong is this prediction in relation to the actual system state. For this, we could calculate the predictin error, $\bvec{\bar{e}_k} = \bvec{x_k} - \mb{\bar{\mu}}_\mathbf{k}$, sparseness. In other words, we want to know the prediction error covariance matrix, $\mat{\bar{P}_k}$, defined as the expectation in Eq. \ref{eq:kf-error-covariance-matrix-def}.
+A good thing to know is how wrong is this prediction in relation to the actual system state. For this, we could calculate the predictin error, $\bvec{\bar{e}_k} = \bvec{x_k} - \mb{\overline{\mu}}_\mathbf{k}$, sparseness. In other words, we want to know the prediction error covariance matrix, $\mat{\bar{P}_k}$, defined as the expectation in Eq. \ref{eq:kf-error-covariance-matrix-def}.
 
 \begin{equation}
     \mat{\bar{P}_k} = \expv{\bvec{\bar{e}_k} \, \bvecT{\bar{e}_k}}
@@ -944,7 +944,7 @@ A good thing to know is how wrong is this prediction in relation to the actual s
 The current prediction error can be rewritten as follows:
 \begin{equation}
     \begin{aligned}
-        \bvec{\bar{e}_k} &= \blue{\bvec{x_k}} - \magenta{\mb{\bar{\mu}}_\mathbf{k}} \\
+        \bvec{\bar{e}_k} &= \blue{\bvec{x_k}} - \magenta{\mb{\overline{\mu}}_\mathbf{k}} \\
         &= \blue{\mat{A_k}\bvec{x_{k-1}} + \cancel{\mat{B_k}\bvec{u_k}} + \mb{\eps}_\mathbf{k}} - \magenta{\mat{A_k} \mb{\mu}_\mathbf{k-1} + \cancel{\mat{B_k}\bvec{u_k}} }\\
         &= \mat{A_k}\parentheses{\bvec{x_{k-1}} - \mb{\mu}_\mathbf{k-1}} + \mb{\eps}_\mathbf{k} \\
         &= \mat{A_k}\bvec{e_{k-1}} + \mb{\eps}_\mathbf{k}
@@ -966,13 +966,13 @@ Using the above \textquote{error dynamic system}, we can write the prediction er
 From Eq. \ref{eq:kf-prediction-covariance}, we can see that the prediction error covariance grows between time steps, because in each time step a term $\mat{R_k}$ (positive definite) is always added. So the predicted mean diverges from the actual system state. What we want to have is a correction term $\mat{\Psi_k}$ to correct our predicted mean towards the actual one.
 
 \begin{equation}
-    \mb{\mu}_\mathbf{k} = \mb{\bar{\mu}}_\mathbf{k} + \mat{\Psi_k}
+    \mb{\mu}_\mathbf{k} = \mb{\overline{\mu}}_\mathbf{k} + \mat{\Psi_k}
 \end{equation}
 
 But until now, we just used the system dynamics, when, we also have the system measurement. The idea is, somehow, to use the measurement to correct our prediction, even in presence of the measurement noise $\mb{\delta}_\mathbf{k}$. Let's call by $\bvec{z_k}$ the measurement we would expect to get from the sensor if the system state was close to the predicted mean.
 
 \begin{equation}
-    \bvec{z_k} = \mat{C_k}\, \mb{\bar{\mu}}_\mathbf{k}
+    \bvec{z_k} = \mat{C_k}\, \mb{\overline{\mu}}_\mathbf{k}
 \end{equation}
 
 We can use the error between the actual measurement, $\bvec{y_k}$, and the predicted one, $\bvec{z_k}$, in order to correct the predicted mean towards the actual system state. 
@@ -984,7 +984,7 @@ The Kalman Filter proposes the following correction term, proportional to the di
 \end{equation}
 so the correction, or state update, would be given by Eq. \ref{eq:kf-update}.
 \begin{equation}
-    \mb{\mu}_\mathbf{k} = \mb{\bar{\mu}}_\mathbf{k} + \blue{\mat{K_k}}\parentheses{\bvec{y_k} - \mat{C_k}\mb{\bar{\mu}}_\mathbf{k}}
+    \mb{\mu}_\mathbf{k} = \mb{\overline{\mu}}_\mathbf{k} + \blue{\mat{K_k}}\parentheses{\bvec{y_k} - \mat{C_k}\mb{\overline{\mu}}_\mathbf{k}}
     \label{eq:kf-update}
 \end{equation}
 
@@ -995,12 +995,12 @@ The estimated error, $\mb{\eta}_\mathbf{k}$, between the system state and the up
 \begin{equation}
     \begin{aligned}
        \mb{\eta}_\mathbf{k} &= \bvec{x_k} - \mb{\mu}_\mathbf{k} \\
-       &= \bvec{x_k} - \mb{\bar{\mu}}_\mathbf{k} - \mat{K_k}\parentheses{\magenta{\bvec{y_k}} - \mat{C_k}\mb{\bar{\mu}}_\mathbf{k}}\\
-       &= \blue{\bvec{x_k} - \mb{\bar{\mu}}_\mathbf{k}} - \mat{K_k}\parentheses{\magenta{\mat{C_k}\bvec{x_k} + \mb{\delta}_\mathbf{k}} - \mat{C_k}\mb{\bar{\mu}}_\mathbf{k}}\\
-       &= \blue{\mat{I}\bvec{x_k} - \mat{I}\,\mb{\bar{\mu}}_\mathbf{k}} - \mat{K_k}\parentheses{\mat{C_k}\bvec{x_k} + \mb{\delta}_\mathbf{k} - \mat{C_k}\mb{\bar{\mu}}_\mathbf{k}}\\
-       &= \mat{I}\bvec{x_k} - \mat{I}\,\mb{\bar{\mu}}_\mathbf{k} - \mat{K_k}\mat{C_k}\bvec{x_k} - \mat{K_k}\mb{\delta}_\mathbf{k} + \mat{K_k}\mat{C_k}\mb{\bar{\mu}}_\mathbf{k}\\
-       &= \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}\bvec{x_k} - \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}\mb{\bar{\mu}}_\mathbf{k} - \mat{K_k}\mb{\delta}_\mathbf{k}\\
-       &= \parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \blue{\parentheses{\bvec{x_k} - \mb{\bar{\mu}}_\mathbf{k}}} - \mat{K_k}\mb{\delta}_\mathbf{k}\\
+       &= \bvec{x_k} - \mb{\overline{\mu}}_\mathbf{k} - \mat{K_k}\parentheses{\magenta{\bvec{y_k}} - \mat{C_k}\mb{\overline{\mu}}_\mathbf{k}}\\
+       &= \blue{\bvec{x_k} - \mb{\overline{\mu}}_\mathbf{k}} - \mat{K_k}\parentheses{\magenta{\mat{C_k}\bvec{x_k} + \mb{\delta}_\mathbf{k}} - \mat{C_k}\mb{\overline{\mu}}_\mathbf{k}}\\
+       &= \blue{\mat{I}\bvec{x_k} - \mat{I}\,\mb{\overline{\mu}}_\mathbf{k}} - \mat{K_k}\parentheses{\mat{C_k}\bvec{x_k} + \mb{\delta}_\mathbf{k} - \mat{C_k}\mb{\overline{\mu}}_\mathbf{k}}\\
+       &= \mat{I}\bvec{x_k} - \mat{I}\,\mb{\overline{\mu}}_\mathbf{k} - \mat{K_k}\mat{C_k}\bvec{x_k} - \mat{K_k}\mb{\delta}_\mathbf{k} + \mat{K_k}\mat{C_k}\mb{\overline{\mu}}_\mathbf{k}\\
+       &= \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}\bvec{x_k} - \parentheses{\mat{I} - \mat{K_k}\mat{C_k}}\mb{\overline{\mu}}_\mathbf{k} - \mat{K_k}\mb{\delta}_\mathbf{k}\\
+       &= \parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \blue{\parentheses{\bvec{x_k} - \mb{\overline{\mu}}_\mathbf{k}}} - \mat{K_k}\mb{\delta}_\mathbf{k}\\
        &= \parentheses{\mat{I} - \mat{K_k}\mat{C_k}} \blue{\bvec{\bar{e}_k}} - \mat{K_k}\mb{\delta}_\mathbf{k}\\
     \end{aligned}
     \label{eq:estimated-error}
@@ -1034,7 +1034,7 @@ which is a quadratic in $\mat{K_k}$. Another interest thing to note, is that in 
 
 So, all we have to do is find the minimum of $\Tr(\mat{P_k})$ with respect to $\mat{K_k}$, since it is the only thing we can change. For this we will differentiate $\Tr(\mat{P_k})$ in relation to $\mat{K_k}$ using the results of Equations \ref{eq:trace-ax^tb-derivative}, \ref{eq:trace-axb-derivate} and \ref{eq:trace-xax^t-derivative}.
 
-\begin{equation*}
+\begin{equation}
    \begin{aligned}
        \diffp[]{}{\mat{K_k}}\Tr(\mat{P_k}) &= \diffp[]{}{\mat{K_k}} \Tr\parentheses{\mat{\bar{P}_k} - \mat{\bar{P}_k}\matT{C_k}\matT{K_k} - \mat{K_k C_k \bar{P}_k} +  \mat{K_k}\brac{\mat{C_k}\mat{\bar{P}_k}\matT{C_k} + \mat{Q_k}}\matT{K_k}}\\
        &= \begin{aligned}
@@ -1043,7 +1043,8 @@ So, all we have to do is find the minimum of $\Tr(\mat{P_k})$ with respect to $\
        &= -\blue{\mat{\bar{P}_k}\matT{C_k} - \matT{\bar{P}_k}\matT{C_k}} + \magenta{\mat{K_k}\brac{\mat{C_k}\mat{\bar{P}_k}\matT{C_k} + \mat{Q_k}}^\mathbf{T} + \mat{K_k}\brac{\mat{C_k}\mat{\bar{P}_k}\matT{C_k} + \mat{Q_k}}}\\
        &= \magenta{2 \mat{K_k}\brac{\mat{C_k}\mat{\bar{P}_k}\matT{C_k} + \mat{Q_k}}} - \blue{2 \mat{\bar{P}_k}\matT{C_k}}
    \end{aligned} 
-\end{equation*}
+   \label{eq:kf-gain-calc}
+\end{equation}
 
 Making the above equals to zero, give us the $\mat{K_k}$ matrix that minimizes the sum of the mean squared errors between the actual system state and our estimate, leading us to Eq. \ref{eq:kf-gain}, which is the Kalman Gain equation.
 
@@ -1058,10 +1059,10 @@ Algorithm \ref{alg:discrete-discrete-kf} shows the five equations used in the Ka
 \label{alg:discrete-discrete-kf}
 \begin{algorithmic}[1]
 \Procedure{Kalman Filter}{$\mb{\mu}_\mathbf{k-1}, \mat{P_{k-1}}, \bvec{u_k}, \bvec{y_k}$}
-\State $\mb{\bar{\mu}}_\mathbf{k} \gets \mat{A_k}\bvec{x_{k-1}} + \mat{B_k}\bvec{u_k}$ \Comment{Linear Prediction}
+\State $\mb{\overline{\mu}}_\mathbf{k} \gets \mat{A_k}\bvec{x_{k-1}} + \mat{B_k}\bvec{u_k}$ \Comment{Linear Prediction}
 \State $\mat{\bar{P}_k} \gets \mat{A_k P_{k-1} A^T_k + R_k}$ \Comment{Covariance Prediction}
 \State $\mat{K_k} \gets \mat{\bar{P}_k C^T_k \parentheses{C_k \bar{P}_k C^T_k + Q_k}^{-1}}$ \Comment{Kalman Gain}
-\State $\mb{\mu}_\mathbf{k} \gets \mb{\bar{\mu}}_\mathbf{k} + \mat{K_k} \parentheses{\bvec{y_k} - \mat{C_k}\mb{\bar{\mu}}_\mathbf{k}}$ \Comment{State Update}
+\State $\mb{\mu}_\mathbf{k} \gets \mb{\overline{\mu}}_\mathbf{k} + \mat{K_k} \parentheses{\bvec{y_k} - \mat{C_k}\mb{\overline{\mu}}_\mathbf{k}}$ \Comment{State Update}
 \State $\mat{P_k} \gets \parentheses{\mat{I} - \mat{K_k C_k}}\mat{\bar{P}_k} \parentheses{\mat{I} - \mat{K_k C_k}}^\mathbf{T} + \mat{K_k P_k K_k^T}$ \Comment{Estimation Uncertainty}
 \State \Return $\mb{\mu}_\mathbf{k}, \mat{P_k}$
 \EndProcedure
@@ -1076,8 +1077,10 @@ Equation \ref{eq:kf-estimation-uncertainty-classic} is the prediction error cova
 \end{equation}
 
 \subsubsection{Discrete-Discrete Extended Kalman Filter (EKF)}
-%*When writing about EKF applied in SLAM, it is important to emphasize that the map is part of the system state. The system state is composed by the robot state and the map state.
-The derivation of the EKF is analogous to the KF, but I will do it anyway. The EKF is all about non-linear systems, in a nutshell it linearizes the non-linear system equations around the estimated and predicted means of the system state distributions, and proceeds just the same as the classic Kalman Filter for linear systems.
+The derivation of the EKF is pretty analogous to the KF. The EKF is all about 
+non-linear systems, in a nutshell it linearizes the non-linear system equations 
+around the estimated and predicted means of the system state distributions, and 
+proceeds as the classic Kalman Filter for linear systems.
 Let Eq. \ref{eq:ekf-system} be the system that we want to estimate the state:
 
 \begin{equation}
@@ -1090,96 +1093,132 @@ Let Eq. \ref{eq:ekf-system} be the system that we want to estimate the state:
 
 where $\mb{\varepsilon}_\mathbf{k} \sim \normal{\bvec{0}}{\bvec{R_k}}$ and $\mb{\delta}_\mathbf{k} \sim \normal{\bvec{0}}{\bvec{Q_k}}$, the assumptions that the errors are not correlated in time or with the system state are still necessary.
 
-In order to use Kalman filtering we have to linearize the non-linear system in \ref{eq:ekf-system}, for this we use Taylor series expansion and choose the previous approximate state estimate ($\mb{\tilde{\mu}}_\mathbf{k-1}$) to linearize about.
+In order to use Kalman filtering we have to linearize the non-linear system in \ref{eq:ekf-system}, for this we use Taylor series expansion and choose the previous state estimate ($\bvec{\mu_{k-1}}$) to linearize about.
 
 For the system model $\mb{f}()$ we have that
 \begin{equation*}
-    \mb{f}(\bvec{x_{k-1}, u_k}) = \mb{f}(\mb{\tilde{\mu}}_\mathbf{k-1}, \bvec{u_k}) + \underbrace{\diffp[]{\mb{f}(\bvec{x_{k-1}, u_k}) }{\bvec{x_{k-1}}}\bigg\rvert_{\bvec{x_{k-1}} = \mb{\tilde{\mu}}_\mathbf{k-1}}}_{\mat{F_k}} (\bvec{x_{k-1}} - \mb{\tilde{\mu}}_\mathbf{k-1}) + \hot
+    \mb{f}(\bvec{x_{k-1}, u_k}) = \mb{f}(\bvec{\mu_{k-1}}, 
+    \bvec{u_k}) + \underbrace{\diffp[]{\mb{f}(\bvec{x_{k-1}, u_k}) }
+    {\bvec{x_{k-1}}}\bigg\rvert_{\bvec{x_{k-1}} = \bvec{\mu_{k-1}}}}_{\mat{F_k}} 
+    (\bvec{x_{k-1}} - \bvec{\mu_{k-1}}) + \hot
 \end{equation*}
 ignoring the higher order terms we have a first order linear approximation, $\mb{\tilde{f}}$ to the system model in Eq. \ref{eq:linearized-system-model}
 
 \begin{equation}
-    \mb{\tilde{f}}(\bvec{x_{k-1}, u_k}) = \mb{f}(\mb{\tilde{\mu}}_\mathbf{k-1}, \bvec{u_k}) + \mat{F_k} (\bvec{x_{k-1}} - \mb{\tilde{\mu}}_\mathbf{k-1})
+    \mb{\tilde{f}}(\bvec{x_{k-1}, u_k}) = 
+    \mb{f}(\bvec{\mu_{k-1}}, \bvec{u_k}) 
+    + \mat{F_k} (\bvec{x_{k-1}} - \bvec{\mu_{k-1}})
     \label{eq:linearized-system-model}
 \end{equation}
-the tilde will be used throughout this Section to indicate that we are using the linearized models.
-
-Now that we have the linearized system model, we can calculate the predicted approximate mean:
+the state transition equation in Eq. \ref{eq:ekf-system} is then 
+approximated to:
+\begin{equation}
+\begin{aligned}
+    \bvec{x_k} &\approx \mb{\tilde{f}}(\bvec{x_{k-1}, u_k}) 
+    + \bvec{\varepsilon_k}\\
+    &\approx \mb{f}(\bvec{\mu_{k-1}}, \bvec{u_k}) + \mat{F_k} (\bvec{x_{k-1}} - 
+    \bvec{\mu_{k-1}}) + \bvec{\varepsilon_k}
+\end{aligned}
+\end{equation}
+Using the above equation as the system model, we can calculate the state
+predicted by EKF:
 \begin{equation*}
 \begin{aligned}
-    \mb{\bar{\tilde{\mu}}_\mathbf{k}} &= \expv{\mb{\tilde{x}}_\mathbf{k}} \\
+    \bvec{\overline{\mu}_k} &= \expv{\bvec{x_k}} \\
     &= \expv{\blue{\mb{\tilde{f}}(\bvec{x_{k-1}, u_k})} + \mb{\varepsilon}_\mathbf{k}}\\
-    &= \expv{\blue{\mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k}) + \mat{F_k} (\bvec{x_{k-1}} - \mb{\tilde\mu}_\mathbf{k-1})}} + \cancelto{\bvec{0}}{\expv{\mb{\varepsilon}_\mathbf{k}}} \\
-    &= \expv{\mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k})} + \mat{F_k}\parentheses{\expv{\bvec{x_{k-1}}} - \expv{\mb{\tilde\mu}_\mathbf{k-1}}}
+    &= \expv{\blue{\mb{f}(\bvec{\mu_{k-1}}, \bvec{u_k}) + \mat{F_k} (\bvec{x_{k-1}} - \bvec{\mu_{k-1}})}} + \cancelto{\bvec{0}}{\expv{\mb{\varepsilon}_\mathbf{k}}} \\
+    &= \expv{\mb{f}(\bvec{\mu_{k-1}}, \bvec{u_k})} + \mat{F_k}\parentheses{\expv{\bvec{x_{k-1}}} - \expv{\bvec{\mu_{k-1}}}}
 \end{aligned}
 \end{equation*}
-at this point we must remember that $\bvec{u_k}$ and $\mb{\tilde\mu}_\mathbf{k-1}$ are vectors with a defined value and not random vectors. It means that $\expv{\mb{\tilde\mu}_\mathbf{k-1}}$ is simply $\mb{\tilde\mu}_\mathbf{k-1}$ and $\expv{\mb{f}\parentheses{\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k}}}$ is equal to $\mb{f}\parentheses{\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k}}$, this follows from the expected value definition in Eq. \ref{eq:expected-value}. Then,
+at this point we must remember that $\bvec{u_k}$ and $\bvec{\mu_{k-1}}$ 
+are vectors with a defined value and not random vectors. It means that 
+$\expv{\bvec{\mu_{k-1}}}$ is simply $\bvec{\mu_{k-1}}$ and 
+$\expv{\mb{f}\parentheses{\bvec{\mu_{k-1}}, \bvec{u_k}}}$ is equal to $\mb{f}\parentheses{\bvec{\mu_{k-1}}, \bvec{u_k}}$, this follows from the expected value definition in Eq. \ref{eq:expected-value}. Then,
 \begin{equation}
     \begin{aligned}
-        \mb{\bar{\tilde\mu}}_\mathbf{k} &=    \magenta{\expv{\mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k})}} + \mat{F_k}\parentheses{\expv{\bvec{x_{k-1}}} - \blue{\expv{\mb{\tilde\mu}_\mathbf{k-1}}}}\\
-        &= \magenta{\mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k})} + \mat{F_k}\parentheses{\underbrace{\expv{\bvec{x_{k-1}}}}_{\approx\mb{\tilde\mu}_\mathbf{k-1}} - \blue{\mb{\tilde\mu}_\mathbf{k-1}}}\\
-        &\approx \mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k}) + \mat{F_k}\parentheses{\mb{\tilde\mu}_\mathbf{k-1} - \mb{\tilde\mu}_\mathbf{k-1}}\\
-        &\approx \mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k})
+        \bvec{\overline{\mu}_k} &= \magenta{\expv{\mb{f}(\bvec{\mu_{k-1}}, \bvec{u_k})}} + \mat{F_k}\parentheses{\expv{\bvec{x_{k-1}}} - \blue{\expv{\bvec{\mu_{k-1}}}}}\\
+        &= \magenta{\mb{f}(\bvec{\mu_{k-1}}, \bvec{u_k})} + \mat{F_k}\parentheses{\underbrace{\expv{\bvec{x_{k-1}}}}_{\bvec{\mu_{k-1}}} - \blue{\bvec{\mu_{k-1}}}}\\
+        &= \mb{f}(\bvec{\mu_{k-1}}, \bvec{u_k}) + \mat{F_k}\parentheses{\bvec{\mu_{k-1}} - \bvec{\mu_{k-1}}}\\
+        &= \mb{f}(\bvec{\mu_{k-1}}, \bvec{u_k})
     \end{aligned}
 \label{eq:ekf-mean-prediction}
 \end{equation}
-another important thing is that we approximate $\expv{\bvec{x_{k-1}}} = \mb{\mu}_\mathbf{k-1}$ to $\mb{\tilde\mu}_\mathbf{k-1}$, another assumption of used in the Extended Kalman Filter.
 
-Just as was done with the classic Kalman Filter, we can calculate the prediction error, $\bvec{\bar{\tilde{e}}_k} = \bvec{\tilde{x}_k} - \mb{\bar{\tilde\mu}}_\mathbf{k}$, sparseness.
+Just as was done with the classic Kalman Filter, we can calculate the prediction
+ error, $\bvec{\bar{e}_k} = \bvec{x_k} - \bvec{\overline{\mu}_k}$, sparseness.
 
 \begin{equation}
-\mat{\bar{\tilde P}_k} = \expv{\bvec{\bar{\tilde{e}}_k}\, \bvecT{\bar{\tilde{e}}_k}}    
+\mat{\bar{P}_k} = \expv{\bvec{\bar{e}_k}\, \bvecT{\bar{e}_k}}    
 \end{equation}
 The current approximate prediction error can be rewritten as follows:
 \begin{equation}
     \begin{aligned}
-        \bvec{\bar{\tilde{e}}_k} &= \magenta{\bvec{\tilde{x}_k}} - \blue{\mb{\bar{\tilde\mu}}_\mathbf{k}}\\
-        &= \magenta{\cancel{\mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k})} + \mat{F_k} (\bvec{x_{k-1}} - \mb{\tilde\mu}_\mathbf{k-1}) + \mb{\varepsilon}_\mathbf{k}} - \blue{\cancel{\mb{f}(\mb{\tilde\mu}_\mathbf{k-1}, \bvec{u_k})}}\\
+        \bvec{\bar{e}_k} &= \magenta{\bvec{x_k}} - \blue{\bvec{\overline{\mu}_k}}\\
+        &= \magenta{\cancel{\mb{f}(\bvec{\mu_{k-1}}, \bvec{u_k})} + \mat{F_k} 
+        (\bvec{x_{k-1}} - \bvec{\mu_{k-1}}) + \bvec{\varepsilon_k}} - 
+        \blue{\cancel{\mb{f}(\bvec{\mu_{k-1}}, \bvec{u_k})}}\\
         &= \mat{F_k} \blue{(\bvec{x_{k-1}} - \mb{\tilde\mu}_\mathbf{k-1})} + \mb{\varepsilon}_\mathbf{k}\\
-        &= \mat{F_k}\blue{\bvec{\tilde{e}_{k-1}}} + \mb{\varepsilon}_\mathbf{k}
+        &= \mat{F_k}\blue{\bvec{e_{k-1}}} + \mb{\varepsilon}_\mathbf{k}
     \end{aligned}
 \end{equation}
 Using the above error system, we can calculate the prediction error covariance matrix as follows:
 \begin{equation}
     \begin{aligned}
-        \mat{\bar{\tilde P}_k} &= \expv{\bvec{\bar{\tilde{e}}_k}\, \bvecT{\bar{\tilde{e}}_k}}\\
-        &= \expv{(\mat{F_k}\bvec{\tilde{e}_{k-1}} + \mb{\varepsilon}_\mathbf{k-1}) \, \blue{(\mat{F_k}\bvec{\tilde{e}_{k-1}} + \mb{\varepsilon}_\mathbf{k-1})^\mathbf{T}}}\\
-        &= \expv{(\mat{F_k}\bvec{\tilde{e}_{k-1}} + \mb{\varepsilon}_\mathbf{k-1}) \, \blue{(\bvecT{\tilde{e}_{k-1}}\matT{F_k} + \mb{\varepsilon}_\mathbf{k-1}^\mathbf{T}})}\\
-        &= \mat{F_k}\expv{\bvec{\tilde{e}_{k-1}} \bvecT{\tilde{e}_{k-1}}}\matT{F_k} + \mat{F_k} \underbrace{\expv{ \bvec{\tilde{e}_{k-1}} \mb{\varepsilon}_\mathbf{k-1}^\mathbf{T} }}_{\mat{0}} + \underbrace{\expv{\mb{\varepsilon}_\mathbf{k-1} \bvecT{\tilde{e}_{k-1}}}}_{\mat{0}} \matT{F_{k}} + \expv{\mb{\varepsilon}_\mathbf{k-1} \mb{\varepsilon}_\mathbf{k-1}^\mathbf{T}}\\
-        &= \mat{F_k}\magenta{\expv{\bvec{\tilde{e}_{k-1}} \bvecT{\tilde{e}_{k-1}}}}\matT{F_k} + \blue{\expv{\mb{\varepsilon}_\mathbf{k-1} \mb{\varepsilon}_\mathbf{k-1}^\mathbf{T}}}\\
-        &= \mat{F_k}\magenta{ \mat{\tilde{P}_{k-1}} } \matT{F_k} + \blue{\mat{R_k}}
+        \mat{\bar{P}_k} &= \expv{\bvec{\bar{e}_k}\, \bvecT{\bar{e}_k}}\\
+        &= \expv{(\mat{F_k}\bvec{e_{k-1}} + \mb{\varepsilon}_\mathbf{k-1}) \, 
+        \blue{(\mat{F_k}\bvec{e_{k-1}} + 
+        \mb{\varepsilon}_\mathbf{k-1})^\mathbf{T}}}\\
+        &= \expv{(\mat{F_k}\bvec{e_{k-1}} + \mb{\varepsilon}_\mathbf{k-1}) \, \blue{(\bvecT{e_{k-1}}\matT{F_k} + \mb{\varepsilon}_\mathbf{k-1}^\mathbf{T}})}\\
+        &= \mat{F_k}\expv{\bvec{e_{k-1}} \bvecT{e_{k-1}}}\matT{F_k} + \mat{F_k} \underbrace{\expv{ \bvec{e_{k-1}} \mb{\varepsilon}_\mathbf{k-1}^\mathbf{T} }}_{\mat{0}} + \underbrace{\expv{\mb{\varepsilon}_\mathbf{k-1} \bvecT{e_{k-1}}}}_{\mat{0}} \matT{F_{k}} + \expv{\mb{\varepsilon}_\mathbf{k-1} \mb{\varepsilon}_\mathbf{k-1}^\mathbf{T}}\\
+        &= \mat{F_k}\magenta{\expv{\bvec{e_{k-1}} \bvecT{e_{k-1}}}}\matT{F_k} + \blue{\expv{\mb{\varepsilon}_\mathbf{k-1} \mb{\varepsilon}_\mathbf{k-1}^\mathbf{T}}}\\
+        &= \mat{F_k}\magenta{ \mat{P_{k-1}} } \matT{F_k} + \blue{\mat{R_k}}
     \end{aligned}
+    \label{eq:ekf-prediction-error-covariance}
 \end{equation}
 
-As we did with the classic KF, it is time to include the measurement information to have a better estimate of the system state. To do so, we need to linearize the measurement model too, but this time it is linearized around the predicted approximate mean ($\mb{\bar{\tilde{\mu}}}_\mathbf{k}$):
+As we did with the classic KF, it is time to include the measurement information 
+to have a better estimate of the system state. To do so, we need to linearize 
+the measurement model too, it is linearized around the predicted mean 
+($\bvec{\overline{\mu}_k}$):
 \begin{equation*}
-    \mb{h}(\bvec{x_k}) = \mb{h}\parentheses{\mb{\bar{\tilde{\mu}}}_\mathbf{k}} + \underbrace{\diffp[]{\mb{h}(\bvec{x_k})}{\bvec{x_{k}}} \bigg\lvert_{\bvec{x_k}=\bar{\mb{\tilde{\mu}}}_\mathbf{k}}}_{\mat{H_k}} (\bvec{x_k} - \mb{\bar{\tilde{\mu}}}_\mathbf{k}) + \hot
+    \mb{h}(\bvec{x_k}) = \mb{h}\parentheses{\bvec{\overline{\mu}_k}} + 
+    \underbrace{\diffp[]{\mb{h}(\bvec{x_k})}{\bvec{x_k}}
+    \bigg\lvert_{\bvec{x_k}=\bvec{\overline{\mu}_k}}}_{\mat{H_k}}
+    (\bvec{x_k} - \bvec{\overline{\mu}_k}) + \hot
 \end{equation*}
 and, ignoring the higher order terms, we have the first order approximation of the measurement model in Eq. \ref{eq:linearized-measurement-model}.
 \begin{equation}
-    \mb{\tilde{h}}(\bvec{x_k}) = \mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k}) + \mat{H_k} (\bvec{x_k} - \mb{\bar{\tilde\mu}}_\mathbf{k})
+    \mb{\tilde{h}}(\bvec{x_k}) = \mb{h}(\bvec{\overline{\mu}_k}) + \mat{H_k} (\bvec{x_k} - \bvec{\overline{\mu}_k})
     \label{eq:linearized-measurement-model} 
 \end{equation}
 Then the linearized measurement equation in
 \begin{equation}
-    \bvec{\tilde{y}_k} = \mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k}) + \mat{H_k}(\bvec{x_k} - \mb{\bar{\tilde{\mu}}}_\mathbf{k}) + \mb{\delta}_\mathbf{k}
+    \bvec{y_k} \approx \mb{h}(\bvec{\overline{\mu}_k}) + \mat{H_k}(\bvec{x_k} - \bvec{\overline{\mu}_k}) + \mb{\delta}_\mathbf{k}
 \end{equation}
 and the expected system measurement would be
 \begin{equation}
 \begin{aligned}
-    \bvec{\tilde{z}_k} &= \expv{\mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k}) + \mat{H_k}(\bvec{x_k} - \mb{\bar{\tilde{\mu}}}_\mathbf{k}) + \mb{\delta}_\mathbf{k}}\\
-    &= \blue{\expv{\mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k})}} + \mat{H_k}\magenta{\expv{(\bvec{x_k} - \mb{\bar{\tilde{\mu}}}_\mathbf{k})}} + \cancelto{\mat{0}}{\expv{\mb{\delta}_\mathbf{k}}}\\
-    &= \blue{\mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k})} + \mat{H_k}\magenta{(\expv{\bvec{x_k}} - \mb{\bar{\tilde{\mu}}}_\mathbf{k})}\\
-    &= \mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k}) + \mat{H_k}(\mb{\mu}_\mathbf{k} - \mb{\bar{\tilde{\mu}}}_\mathbf{k})\\
-    &= \mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k}) && \small\text{Applying $\mb{\mu}_\mathbf{k} \approx \mb{\bar{\tilde{\mu}}}_\mathbf{k}$}
+    \bvec{z_k} &= \expv{\mb{h}(\bvec{\overline{\mu}_k}) + \mat{H_k}(\bvec{x_k} - \bvec{\overline{\mu}_k}) + \mb{\delta}_\mathbf{k}}\\
+    &= \blue{\expv{\mb{h}(\bvec{\overline{\mu}_k})}} + \mat{H_k}\magenta{\expv{(\bvec{x_k} - \bvec{\overline{\mu}_k})}} + \cancelto{\mat{0}}{\expv{\mb{\delta}_\mathbf{k}}}\\
+    &= \blue{\mb{h}(\bvec{\overline{\mu}_k})} + \mat{H_k}\magenta{(\expv{\bvec{x_k}} - \bvec{\overline{\mu}_k})}\\
+    &= \mb{h}(\bvec{\overline{\mu}_k}) + \mat{H_k}\magenta{(\expv{
+    \mb{\tilde{f}}(\bvec{x_{k-1}, u_k} + \bvec{\varepsilon_k})} 
+    - \bvec{\overline{\mu}_k})}\\
+    &= \mb{h}(\bvec{\overline{\mu}_k}) + \mat{H_k}(\blue{\expv{
+    \mb{\tilde{f}}(\bvec{x_{k-1}, u_k} + \bvec{\varepsilon_k})}} 
+    - \bvec{\overline{\mu}_k})\\
+    &= \mb{h}(\bvec{\overline{\mu}_k}) + \mat{H_k}(
+        \blue{\bvec{\overline{\mu}_k}} - \bvec{\overline{\mu}_k})\\
+    &= \mb{h}(\bvec{\overline{\mu}_k}) 
 \end{aligned}
 \end{equation}
 
 The EKF update equation is given by:
 \begin{equation}
 \begin{aligned}
-    \mb{\tilde\mu}_\mathbf{k} &= \mb{\bar{\tilde\mu}}_\mathbf{k} + \mat{K_k}\parentheses{\bvec{\tilde{y}_k} - \bvec{\tilde{z}_k}}\\
-    &= \mb{\bar{\tilde\mu}}_\mathbf{k} + \mat{K_k}\parentheses{\bvec{\tilde{y}_k} - \mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k})}\\
+    \bvec{\mu_k} &= \bvec{\overline{\mu}_k} + \mat{K_k}\parentheses{\bvec{y_k} - \bvec{z_k}}\\
+    &= \bvec{\overline{\mu}_k} + \mat{K_k}\parentheses{
+        \bvec{y_k} - \mb{h}(\bvec{\overline{\mu}_k})}\\
     \label{eq:ekf-update}
 \end{aligned}
 \end{equation}
@@ -1187,29 +1226,26 @@ The EKF update equation is given by:
 The EKF estimate error is:
 \begin{equation}
 \begin{aligned}
-    \mb{\tilde\eta}_\mathbf{k} &= \bvec{\tilde{x}_k} - \mb{\tilde{\mu}}_\mathbf{k}\\
-    &= \bvec{\tilde{x}_k} - \parentheses{\mb{\bar{\tilde\mu}}_\mathbf{k} + \mat{K_k}\parentheses{\blue{\bvec{\tilde{y}_k}}
-        - \mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k})}}\\
-    &= \bvec{\tilde{x}_k} - \parentheses{\mb{\bar{\tilde\mu}}_\mathbf{k} 
+    \bvec{\eta_k} &= \bvec{x_k} - \bvec{\mu_k}\\
+    &= \bvec{x_k} - \parentheses{\bvec{\overline{\mu}_k} + 
+    \mat{K_k}\parentheses{\blue{\bvec{y_k}}
+        - \mb{h}(\bvec{\overline{\mu}_k})}}\\
+    &= \bvec{x_k} - \parentheses{\bvec{\overline{\mu}_k} 
     + \mat{K_k}\parentheses{\blue{\cancel{\mb{h}(
-        \mb{\bar{\tilde\mu}}_\mathbf{k})} + \mat{H_k}(\bvec{x_k} 
-        - \mb{\bar{\tilde{\mu}}}_\mathbf{k}) 
+        \bvec{\overline{\mu}_k})} + \mat{H_k}(\bvec{x_k} 
+        - \bvec{\overline{\mu}_k}) 
         + \mb{\delta}_\mathbf{k}} 
-        - \cancel{\mb{h}(\mb{\bar{\tilde\mu}}_\mathbf{k}})}}\\
-    &= \bvec{\tilde{x}_k} - \mat{K_k H_k} \magenta{\bvec{x_k}}
-    - \mb{\bar{\tilde{\mu}}}_\mathbf{k} + \mat{K_k H_k}
-    \mb{\bar{\tilde{\mu}}}_\mathbf{k} + \mat{K_k} \mb{\delta}_\mathbf{k}\\
-    &= \bvec{\tilde{x}_k} - \mat{K_k H_k} \magenta{\bvec{\tilde{x}_k}}
-    - \mb{\bar{\tilde{\mu}}}_\mathbf{k} + \mat{K_k H_k}
-    \mb{\bar{\tilde{\mu}}}_\mathbf{k} + \mat{K_k} \mb{\delta}_\mathbf{k}
-    && \small\text{Applying $\bvec{x_k} \approx \bvec{\tilde{x}_k}$}\\
-    &= \parentheses{\mat{I - K_k H_k}}\bvec{\tilde{x}_k} 
-    -\parentheses{\mat{I - K_k H_k}}\mb{\bar{\tilde{\mu}}}_\mathbf{k}
+        - \cancel{\mb{h}(\bvec{\overline{\mu}_k}})}}\\
+    &= \bvec{x_k} - \mat{K_k H_k} \magenta{\bvec{x_k}}
+    - \bvec{\overline{\mu}_k} + \mat{K_k H_k}
+    \bvec{\overline{\mu}_k} + \mat{K_k} \mb{\delta}_\mathbf{k}\\
+    &= \parentheses{\mat{I - K_k H_k}}\bvec{x_k} 
+    -\parentheses{\mat{I - K_k H_k}}\bvec{\overline{\mu}_k}
     + \mat{K_k} \mb{\delta}_\mathbf{k}\\
-    &= \parentheses{\mat{I - K_k H_k}} \blue{(\bvec{\tilde{x}_k} 
-    - \mb{\bar{\tilde{\mu}}}_\mathbf{k})} 
+    &= \parentheses{\mat{I - K_k H_k}} \blue{(\bvec{x_k} 
+    - \bvec{\overline{\mu}_k})} 
     + \mat{K_k} \mb{\delta}_\mathbf{k}\\
-    &= \parentheses{\mat{I - K_k H_k}} \blue{\bvec{\bar{\tilde{e}}_k}} 
+    &= \parentheses{\mat{I - K_k H_k}} \blue{\bvec{\bar{e}_k}} 
     + \mat{K_k} \mb{\delta}_\mathbf{k}
 \end{aligned}
 \end{equation}
@@ -1219,47 +1255,109 @@ omitted below because it is really analogous to what was done in the
 classic KF in Eq. \ref{eq:kf-estimate-covariance}.
 \begin{equation}
 \begin{aligned}
-    \mat{\tilde{P}_k} &= \expv{\bvec{\tilde{\eta}_k} 
-        \bvecT{\tilde{\eta}_k}}\\
-    &= \expv{\parentheses{(\mat{I - K_k H_k})\bvec{\bar{\tilde{e}}_k}
+    \mat{P_k} &= \expv{\bvec{\eta_k} 
+        \bvecT{\eta_k}}\\
+    &= \expv{\parentheses{(\mat{I - K_k H_k})\bvec{\bar{e}_k}
     + \mat{K_k}\bvec{\delta_k}} \parentheses{(\mat{I - K_k H_k})
-    \bvec{\bar{\tilde{e}}_k} 
+    \bvec{\bar{e}_k} 
     + \mat{K_k}\bvec{\delta_k}}^\mathbf{T}}\\
-    &= \expv{\parentheses{(\mat{I - K_k H_k})\bvec{\bar{\tilde{e}}_k}
-    + \mat{K_k}\bvec{\delta_k}} \parentheses{\bvecT{\bar{\tilde{e}}_k}
+    &= \expv{\parentheses{(\mat{I - K_k H_k})\bvec{\bar{e}_k}
+    + \mat{K_k}\bvec{\delta_k}} \parentheses{\bvecT{\bar{e}_k}
     (\mat{I - H_k K_k})^\mathbf{T} 
     + \bvecT{\delta_k}\matT{K_k}}}\\
-    &= (\mat{I - K_k H_k})\blue{\expv{\bvec{\bar{\tilde{e}}_k} 
-    \bvecT{\bar{\tilde{e}}_k}}}(\mat{I - K_k H_k})^\mathbf{T} 
+    &= (\mat{I - K_k H_k})\blue{\expv{\bvec{\bar{e}_k} 
+    \bvecT{\bar{e}_k}}}(\mat{I - K_k H_k})^\mathbf{T} 
     + \mat{K_k}\magenta{\expv{\bvec{\delta_k}} \bvecT{\delta_k}}\matT{K_k}\\
-    &= (\mat{I - K_k H_k})\blue{\mat{\bar{\tilde{P}}_k}}(\mat{I - K_k H_k})^\mathbf{T} 
+    &= (\mat{I - K_k H_k})\blue{\mat{\overline{P}_k}}(\mat{I - K_k H_k})^\mathbf{T} 
     + \mat{K_k}\magenta{\mat{Q_k}}\matT{K_k}
 \end{aligned}
 \label{eq:ekf-estimate-error-covariance}
 \end{equation}
+Expanding the terms of the above equation, we obtain a quadratic form
+in $\mat{K_k}$:
+\begin{equation}
+    \mat{P_k} = \mat{\overline{P}_k} + \mat{K_k}
+    \parentheses{\mat{H_k \overline{P}_k}\matT{H_k} + \mat{Q_k}}
+    \matT{K_k} - \mat{K_k H_k \overline{P}_k} 
+    - \mat{\overline{P}_k H_k^T K_k^T}
+\end{equation}
+Then we minimize the trace of $\mat{P_k}$ with respect to 
+$\mat{K_k}$, this way, we obtain the minimum sum of the mean 
+squared error of the estimate. 
 
-Using Eq. \ref{eq:linearized-system-model} and \ref{eq:linearized-measurement-model}, we have the first order linear approximation for the non-linear system, in Eq. \ref{eq:ekf-system}, below:
+\begin{equation}
+\begin{aligned}
+    \diffp[]{}{\mat{K_k}} \mytr{\mat{P_k}} &= 
+    \diffp[]{}{\mat{K_k}} \Tr \parentheses{\mat{\overline{P}_k} 
+    + \mat{K_k} \parentheses{\mat{H_k \overline{P}_k}\matT{H_k} 
+    + \mat{Q_k}} \matT{K_k} - \mat{K_k H_k \overline{P}_k}
+    - \mat{\overline{P}_k H_k^T K_k^T}}\\
+    &= \begin{aligned}
+        &\cancelto{\mat{0}}{ \diffp[]{}{\mat{K_k}}
+        \mytr{\mat{\overline{P}_k}}} + \diffp[]{}{\mat{K_k}}\mytr{
+        \mat{K_k} \parentheses{\mat{H_k \overline{P}_k}
+        \matT{H_k} + \mat{Q_k}} \matT{K_k}} + \dots\\
+        & \blue{-\diffp[]{}{\mat{K_k}} \mytr{\mat{K_k H_k 
+        \overline{P}_k}} -\diffp[]{}{\mat{K_k}}\mytr{\mat{
+        \mat{\overline{P}_k H_k^T K_k^T}}}}
+    \end{aligned} \\
+    &= \diffp[]{}{\mat{K_k}}\mytr{
+        \mat{K_k} \parentheses{\mat{H_k \overline{P}_k}
+        \matT{H_k} + \mat{Q_k}} \matT{K_k}} - \blue{2\,
+        \diffp[]{}{\mat{K_k}} \mytr{\mat{K_k H_k\overline{P}_k}}}
+\end{aligned}
+\end{equation}
+
+Applying the same principles used in Eq. \ref{eq:kf-gain-calc} we
+have that the Kalman Gain for the EKF is:
+\begin{equation}
+    \mat{K_k} = \mat{\overline{P}_k H_k^T}\brac{\mat{H_k 
+    \overline{P}_k H_k^T + Q_k}}^\mathbf{-1}
+    \label{eq:ekf-gain}
+\end{equation}
+
+Equations \ref{eq:ekf-mean-prediction}, 
+\ref{eq:ekf-prediction-error-covariance}, \ref{eq:ekf-update},
+\ref{eq:ekf-estimate-error-covariance} and \ref{eq:ekf-gain}
+define the Extended Kalman Filter. They look very similar to the ones
+used in the classic Kalman Filter, but the later is guaranteed
+the best possible estimate, while the EKF estimate is not. This happens
+because to use the EKF we have to linearize the system model around the state 
+estimate $\bvec{\mu_k}$ and  the measurement model around the state prediction 
+$\bvec{\overline{\mu}_k}$. 
+
+In summary, the EKF is the Kalman Filter applied to the linear system in 
+Eq. \ref{eq:ekf-linearized-system}, the jacobian notation $\mat{G_k}$ and 
+$\mat{H_k}$ is a little trick, because the first is the jacobian of the 
+system model with respect to the previous \emph{estimated} mean 
+($\mb{\tilde\mu}_\mathbf{k-1}$), while the latter is the jacobian 
+of the measurement model with respect to the current \emph{predicted} 
+mean ($\bvec{\overline{\mu}_k}$).
+
 \begin{equation}
     \begin{aligned}
-        \bvec{\tilde{x}_k} &= \blue{\mb{\tilde{f}}(\bvec{x_{k-1}, u_k})} + \mb{\varepsilon}_\mathbf{k} &&= \blue{\mb{f}(\mb{\mu}_\mathbf{k-1}, \bvec{u_k}) + \mat{F_k} (\bvec{x_{k-1}} - \mb{\mu}_\mathbf{k-1})} + \mb{\varepsilon}_\mathbf{k}\\
-        \bvec{\tilde{y}_k} &= \magenta{\mb{\tilde{h}}(\bvec{x_k})} + \mb{\delta}_\mathbf{k} &&= \magenta{\mb{h}(\bar{\mb{\mu}}_\mathbf{k}) + \mat{H_k} (\bvec{x_k} - \mb{\bar{\mu}}_\mathbf{k})} + \mb{\delta}_\mathbf{k}\\
+        \bvec{x_k} &\approx \mb{f}(\mb{\mu}_\mathbf{k-1}, \bvec{u_k}) + 
+        \mat{F_k} (\bvec{x_{k-1}} - \mb{\mu}_\mathbf{k-1}) + 
+        \mb{\varepsilon}_\mathbf{k}\\
+        \bvec{y_k} &\approx \mb{h}(\bar{\mb{\mu}}_\mathbf{k}) + \mat{H_k} 
+        (\bvec{x_k} - \mb{\overline{\mu}}_\mathbf{k}) + \mb{\delta}_\mathbf{k}\\
     \end{aligned}
     \label{eq:ekf-linearized-system}
 \end{equation}
 
-The EKF is the Kalman Filter applied to the linear system in Eq. \ref{eq:ekf-linearized-system}, the jacobian notation $\mat{G_k}$ and $\mat{H_k}$ is a little trick, because the first is the jacobian of the system model with respect to the previous \emph{estimated} approximate mean ($\mb{\tilde\mu}_\mathbf{k-1}$), while the latter is the jacobian of the measurement model with respect to the current \emph{predicted} approximate mean ($\mb{\bar{\tilde\mu}}_\mathbf{k}$).
-
+Algorithm \ref{alg:ekf} shows the five EKF equations in order.
 
 \begin{algorithm}[h]
 \caption{Discrete-Discrete Extended Kalman Filter}
 \label{alg:ekf}
 \begin{algorithmic}[1]
-\Procedure{Extended Kalman Filter}{$\mb{\mu}_\mathbf{k-1}, \mat{P_{k-1}}, \bvec{u_k}, \bvec{z_k}$}
-\State $\mb{\bar{\mu}}_\mathbf{k} \gets \mb{g}(\mb{\mu}_\mathbf{k-1}, \bvec{u_k})$ \Comment{Nonlinear Prediction}
-\State $\mat{\bar{P}_k} \gets \mat{G_k P_{k-1} G^T_k + R_k}$ \Comment{Covariance Prediction}
-\State $\mat{K_k} \gets \mat{\bar{P}_k H^T_k \parentheses{H_k \bar{P}_k H^T_k + Q_k}^{-1}}$ \Comment{Kalman Gain}
-\State $\mb{\mu}_\mathbf{k} \gets \mb{\bar{\mu}}_\mathbf{k} + \mat{K_k} \parentheses{\bvec{z_k} - \mb{h}(\mb{\bar{\mu}}_\mathbf{k})}$ \Comment{State Update}
-\State $\mat{P_k} \gets \parentheses{\mat{I - K_k H_k}} \mat{\bar{P}_k}$ \Comment{Estimation Uncertainty}
+\Procedure{Extended Kalman Filter}{$\mb{\mu}_\mathbf{k-1}, \mat{P_{k-1}}, 
+\bvec{u_k}, \bvec{y_k}$}
+\State $\mb{\overline{\mu}}_\mathbf{k} \gets \mb{g}(\mb{\mu}_\mathbf{k-1}, \bvec{u_k})$ \Comment{Nonlinear Prediction}
+\State $\mat{\overline{P}_k} \gets \mat{G_k P_{k-1} G^T_k + R_k}$ \Comment{Covariance Prediction}
+\State $\mat{K_k} \gets \mat{\overline{P}_k H^T_k \parentheses{H_k \overline{P}_k H^T_k + Q_k}^{-1}}$ \Comment{Kalman Gain}
+\State $\mb{\mu}_\mathbf{k} \gets \mb{\overline{\mu}}_\mathbf{k} + \mat{K_k} \parentheses{\bvec{y_k} - \mb{h}(\mb{\overline{\mu}}_\mathbf{k})}$ \Comment{State Update}
+\State $\mat{P_k} \gets \parentheses{\mat{I - K_k H_k}} \mat{\overline{P}_k}$ \Comment{Estimation Uncertainty}
 \State \Return $\mb{\mu}_\mathbf{k}, \mat{P_k}$
 \EndProcedure
 \end{algorithmic}
@@ -1306,9 +1404,9 @@ Before getting into the specifics of the information filter, it is important to 
 \State $\mb{\mu}_\mathbf{k-1} \gets \mat{\Omega_{k-1}^{-1}}  \, \mb{\xi}_\mathbf{k-1}$
 \State $\mat{\bar{\Omega}_k} \gets \parentheses{\mat{G_k \, \Omega_{k-1}^{-1} \, G_k^T + R_k}}^\mathbf{-1}$
 \State $\mb{\bar{\xi}}_{\mathbf{k}} \gets \mat{\bar{\Omega}_k} \, \mb{g}(\mb{\mu}_\mathbf{k-1}, \bvec{u_k})$
-\State $\mb{\bar{\mu}}_\mathbf{k} \gets  \mb{g}(\mb{\mu}_\mathbf{k-1}, \bvec{u_k})$
+\State $\mb{\overline{\mu}}_\mathbf{k} \gets  \mb{g}(\mb{\mu}_\mathbf{k-1}, \bvec{u_k})$
 \State $\mat{\Omega_k} \gets \mat{\bar{\Omega}_k + H_k^T \, Q_k^{-1} \, H_k}$
-\State $\mb{\xi}_k \gets \mb{\bar{\xi}}_k + \mat{H_k^T\, Q_k^{-1}} \brac{\bvec{y_k} - \mb{h}(\mb{\bar{\mu}}_\mathbf{k}) + \mat{H_k}\,\mb{\bar{\mu}}_\mathbf{k}}$
+\State $\mb{\xi}_k \gets \mb{\bar{\xi}}_k + \mat{H_k^T\, Q_k^{-1}} \brac{\bvec{y_k} - \mb{h}(\mb{\overline{\mu}}_\mathbf{k}) + \mat{H_k}\,\mb{\overline{\mu}}_\mathbf{k}}$
 \State \Return $\mb{\xi}_\mathbf{k}, \mat{\Omega_k}$
 \EndProcedure
 \end{algorithmic}
@@ -1930,10 +2028,20 @@ A measurement $\bvec{y}_\mb{j}$ is defined as:
 \end{equation}
 
 \section{EKF SLAM}
+%*When writing about EKF-SLAM applied in SLAM, it is important to emphasize 
+%that the map is part of the system state. The system state 
+%is composed by the robot state and the map state.
 \blue{\textbf{TODO}}
 
 \subsection{Landmark Initialization}
-When the robot sees a new landmark, we can expect that the estimation error of this new landmark has to account the robot positioning error and the sensor error. It is not fair to initialize it with $\inf$ like \cite[p.~ ]{bongard2006probabilistic} says so, because the robot already have a guess about where it is when it makes the new observation, so the error can not be $\inf$.
+\blue{\textbf{INTRODUCE WHY LANDMARK INITIALIZATION}}
+
+When the robot sees a new landmark, we can expect that the estimation error of 
+this new landmark has to account the robot positioning error and the sensor 
+error. It is not fair to initialize it with $\inf$ like 
+\cite[p.~ ]{bongard2006probabilistic} says so, because the robot already have a 
+guess about where it is when it makes the new observation, so the error can not 
+be $\inf$.
 
 \section{Appendix}
 \subsection{Properties of the inverse matrix}
