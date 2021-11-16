@@ -27,6 +27,7 @@
 \newcommand{\bvecT}[1]{\boldsymbol{\mathbf{#1^T}}} % bold vector transposed
 \newcommand{\mat}[1]{\boldsymbol{\mathbf{#1}}}
 \newcommand{\matT}[1]{\boldsymbol{\mathbf{#1^T}}}
+\newcommand{\eye}[1]{\mat{I}_{#1\times #1}} %identity matrix
 \newcommand{\bel}{\mathop{bel}} % belief
 \newcommand{\given}{\,|\,} % p(a \given b) -> p(a | b)
 \newcommand{\cbrac}[1]{\left\{#1\right\}} % curly brackets
@@ -2000,31 +2001,50 @@ In order to use the non-linear model described in the previous section with the 
 \renewcommand{\arraystretch}{1.0}
 
 \subsection{The Range-Bearing measurement inverse model}
-A measurement $\bvec{y}_\mb{j}$ is defined as:
+\label{sec:inv-measurement-model}
+A measurement $\bvec{y}$ is defined as:
 \begin{equation}
-    \bvec{y}_\mb{j} = \begin{bmatrix}
-        r_j \\ 
-        \theta_j \end{bmatrix}
+    \bvec{y} = \begin{bmatrix}
+        r + \delta_r\\ 
+        \theta + \delta_\theta \end{bmatrix}
+\end{equation}
+and the expected measurement $\bvec{z}$ is
+\begin{equation}
+    \bvec{z} = \expv{\bvec{y}} = \expv{
+        \begin{bmatrix}
+        r + \delta_r\\ 
+        \theta + \delta_\theta \end{bmatrix}} = \begin{bmatrix}
+            r \\ \theta
+        \end{bmatrix}
 \end{equation}
 
+The range bearing 
 \begin{equation}
-    \mb{g_j}(\bvec{x}, \bvec{y}_\mb{j}) = 
+    \mb{g}(\bvec{x}, \bvec{z}) = 
     \begin{bmatrix}
-        m_{j, x} \\
-        m_{j, y} \\
+        m_x \\
+        m_y \\
     \end{bmatrix} =
     \begin{bmatrix}
-        x_l + r_j \cos(\phi + \theta_j)\\
-        y_l + r_j \sin(\phi + \theta_j) 
+        x_l + r \cos(\phi + \theta)\\
+        y_l + r \sin(\phi + \theta) 
     \end{bmatrix}
     \label{eq:measurement-inverse-model}
 \end{equation}
 
 \begin{equation}
-    \diffp[]{}{\bvec{x}} \mb{g_j}(\bvec{x}, \bvec{y}_\mb{j}) = \begin{bmatrix}\begin{bmatrix}
-        -d \sin{\phi_j} - r_j \sin(\phi + \theta_j)  & 1 & 0\\
-        d\cos{\phi} + r_j\cos(\phi + \theta_j) & 0 & 1
-    \end{bmatrix} & \matnull{2}{2M}\end{bmatrix}
+    \diffp[]{}{\bvec{x}} \, \mb{g}(\bvec{x}, \bvec{z}) = 
+    \begin{bmatrix}\begin{bmatrix}
+        -d \sin{\phi} - r \sin(\phi + \theta)  & 1 & 0\\
+        d\cos{\phi} + r\cos(\phi + \theta) & 0 & 1
+    \end{bmatrix} & \matnull{2}{n-3} \end{bmatrix}_{2 \times n}
+\end{equation}
+
+\begin{equation}
+    \diffp[]{}{\bvec{z}} \, \mb{g}(\bvec{x}, \bvec{z}) = \begin{bmatrix}
+       \cos(\phi + \theta) & -r\sin(\phi + \theta)\\
+       \sin(\phi + \theta) & r\cos(\phi + \theta)
+    \end{bmatrix}_{2 \times 2}
 \end{equation}
 
 \section{EKF SLAM}
@@ -2034,19 +2054,153 @@ A measurement $\bvec{y}_\mb{j}$ is defined as:
 \blue{\textbf{TODO}}
 
 \subsection{Landmark Initialization}
-\blue{\textbf{INTRODUCE WHY LANDMARK INITIALIZATION}}
+When using the Extended Kalman Filter to solve the SLAM problem, it is necessary 
+to initialize new landmarks as the robot moves through the environment and 
+discovers new unseen places. In practice the state vector size of the 
+EKF becomes dynamic, it grows when a new landmark is incorporated into 
+the map. This operation of incorporating new map data into the state vector is
+exclusive of the EKF-SLAM algorithm, such operation is not performed in a 
+regular use of the standard Extended Kalman Filter.
 
-When the robot sees a new landmark, we can expect that the estimation error of 
-this new landmark has to account the robot positioning error and the sensor 
-error. It is not fair to initialize it with $\inf$ like 
-\cite[p.~ ]{bongard2006probabilistic} says so, because the robot already have a 
-guess about where it is when it makes the new observation, so the error can not 
-be $\inf$.
+\begin{equation}
+    x^*_{1:n+2} = \mb{\sigma}(x_{1:n}, \bvec{z_j})
+\end{equation}
+
+The $\mb{\sigma}(\cdot)$ function above, takes the current state vector of size 
+$n$ and the measurement $\bvec{z_j}$ of the new \textit{jth} landmark and 
+returns a new state vector of size $n+2$ with the new landmark $(x, y)$ 
+position, calculated through the inverse measurement model $\mb{g}(\cdot)$, 
+appended at the end.
+
+When the robot sees a new landmark, we can expect that the estimated error of 
+this new landmark position has to account the robot positioning error and the 
+sensor error. It is not fair to initialize it with $\infty$ like 
+\cite[p.~ 317]{bongard2006probabilistic} says so, because the robot already 
+have a guess about where it is when it makes the new observation, so the error 
+can not be $\infty$.
+
+The aforementioned $\mb{\sigma}(\cdot)$ function appends the new landmark 
+($m_{j,x}, m_{j,y})$ position into the map, using the inverse measurement model 
+(Section \ref{sec:inv-measurement-model}). It is defined in Eq. 
+\ref{eq:ekf-slam-landmark-append}
+
+\begin{equation}
+    \mb{\sigma}(\bvec{x_k, z_j}) = \begin{bmatrix}
+        \bvec{x_k} \\
+        \mb{g}(\bvec{x_k}, \bvec{z_j})
+    \end{bmatrix}
+    \label{eq:ekf-slam-landmark-append}
+\end{equation}
+
+As $\mb{g}(\cdot)$ is nonlinear, we need to linearize it in order to use with 
+EKF. We will linearize around $(\bvec{\mu_k}, \bvec{y_j})$, that is, 
+the current estimate mean and the new landmark measurement.
+\begin{equation}
+    \begin{aligned}
+    \mb{g}(\bvec{x_k}, \bvec{z_j}) &= 
+    \mb{g}(\bvec{\mu_k, y_j}) + \underbrace{\diffp[]{\mb{g}(\bvec{x_k}, \bvec{z_j})}{\bvec{x_k}} 
+    \bigg\lvert_{\bvec{x_k} = \bvec{\mu_k}}}_{\mat{\Sigma_x}} 
+    \magenta{(\bvec{x_k - \mu_k})} + \underbrace{\diffp[]{\mb{g}
+    (\bvec{x_k}, \bvec{z_j})}{\bvec{z_j}} \bigg\lvert_{
+        \bvec{z_j} = \bvec{y_j}}}_{\mat{\Sigma_z}} 
+    \blue{(\bvec{z_j - y_j})} + \hot \\
+    &= \mb{g}(\bvec{\mu_k, y_j}) + \mat{\Sigma_x} \magenta{\bvec{\eta_k}} 
+    + \mat{\Sigma_z} \blue{\bvec{\delta_j}} + \hot
+    \end{aligned}
+\end{equation}
+
+Then the approximated append function is:
+\begin{equation}
+    \mb{\tilde{\sigma}}(\bvec{x_k}, \bvec{z_j}) \approx \begin{bmatrix}
+       \bvec{x_k} \\
+       \mb{g}(\bvec{\mu_k, y_j}) + \mat{\Sigma_x \eta_k + \Sigma_z \delta_j}
+    \end{bmatrix}
+\label{eq:ekf-slam-append-approx}
+\end{equation}
+
+The expectation of the append operation is:
+\begin{equation}
+\begin{aligned}
+    \bvec{\mu_k^*} &= \expv{\bvec{\tilde{\sigma}}(\bvec{x_k, z_j})}\\
+    &= \begin{bmatrix}
+        \expv{\bvec{x}} \\
+        \expv{\mb{g}(\bvec{\mu_k, y_j})} + \mat{\Sigma_x} 
+        \cancelto{\bvec{0}}{\expv{\bvec{\eta_k}}} + \mat{\Sigma_z} 
+        \cancelto{\bvec{0}}{\expv{\bvec{\delta_j}}}
+    \end{bmatrix}\\
+    &= \begin{bmatrix}
+        \bvec{\mu_k} \\
+        \mb{g}(\bvec{\mu_k, y_j})
+    \end{bmatrix}
+\end{aligned}
+\end{equation}
+
+The append error is 
+\begin{equation}
+\begin{aligned}
+   \bvec{\alpha} &= \bvec{x_k^* - \mu_k^*}\\
+   &= \begin{bmatrix}
+       \bvec{x_k} \\ \mb{g(\bvec{x_k, z_j})}
+   \end{bmatrix} - \begin{bmatrix}
+       \bvec{\mu_k} \\ \mb{g}(\bvec{\mu_k, y_j})
+   \end{bmatrix} = \begin{bmatrix}
+       \blue{\bvec{x_k - \mu_k}}\\
+       \magenta{\mb{g(\bvec{x_k, z_j})}} - \mb{g}(\bvec{\mu_k, y_j})
+   \end{bmatrix}\\
+   &= \begin{bmatrix}
+       \blue{\bvec{\eta_k}} \\
+       \magenta{\cancel{\mb{g}(\bvec{\mu_k, y_j})} + 
+       \mat{\Sigma_x \eta_k + \Sigma_z \delta_j}} 
+       - \cancel{\mb{g}(\bvec{\mu_k, y_j}})
+   \end{bmatrix} && \small\text{Applied Eq. 
+   \ref{eq:ekf-slam-append-approx}}\\
+    &= \begin{bmatrix}
+       \bvec{\eta_k} \\
+       \mat{\Sigma_x \eta_k + \Sigma_z \delta_j}
+   \end{bmatrix}
+\end{aligned}
+\end{equation}
+
+The append error covariance is given by
+\begin{equation}
+\begin{aligned}
+    \mat{P_k^*} &= \expv{\bvec{\alpha} \,\bvecT{\alpha}}\\
+    &= \expv{\begin{bmatrix}
+        \bvec{\eta_k} \\ \mat{\Sigma_x \eta_k + \Sigma_z \delta_j}
+    \end{bmatrix} \begin{bmatrix}
+        \bvecT{\eta_k} & \mat{\eta_k^T \Sigma_x^T + \delta_j^T \Sigma_z^T}
+    \end{bmatrix}}\\
+    &= \begin{bmatrix}
+        \blue{\expv{\bvec{\eta_k}\bvecT{\eta_k}}} & \expv{\bvec{\eta_k} 
+        (\mat{\eta_k^T \Sigma_x^T + \delta_j^T \Sigma_z^T})} \\
+        \expv{(\mat{\Sigma_x \eta_k + \Sigma_z \delta_j})\bvecT{\eta_k}} & 
+        \expv{(\mat{\Sigma_x \eta_k + \Sigma_z \delta_j})(\mat{\eta_k^T 
+        \Sigma_x^T + \delta_j^T \Sigma_z^T})}
+    \end{bmatrix}\\
+    \end{aligned}
+\end{equation}
+with the fact that $\expv{\bvec{\delta_j \, \eta_k^T}} = \expv{\bvec{\eta_k \,
+\delta_j^T}} = \bvec{0}$, we end up with:
+
+\begin{equation}
+    \mat{P_k^*} = \begin{bmatrix}
+       \blue{\mat{P_k}} & \mat{P_K \Sigma_x^T}\\
+       \mat{\Sigma_x P_k} & \magenta{\mat{\Sigma_x P_k \Sigma_x^T} 
+       + \mat{\Sigma_z Q_j \Sigma_z^T}}
+    \end{bmatrix}
+\end{equation}
+
+that is, the new covariance matrix is the old covariance matrix $\mat{P_k}$ 
+appended with the cross-covariances ($\mat{\Sigma_x P_k}$ and $\mat{P_k 
+\Sigma_x^T}$) and the new landmark position covariance, highlighted in magenta. 
+The new landmark position covariance is a combination of the system covariance, 
+up to its insertion, and the sensor error covariance.
 
 \section{Appendix}
 \subsection{Properties of the inverse matrix}
 \begin{enumerate}
-    \item For any $n\times n$ invertible matrices $\mat{A}$ and $\mat{B}$, the following holds true:
+    \item For any $n\times n$ invertible matrices $\mat{A}$ and $\mat{B}$, the 
+    following holds true:
     \begin{equation}
         \mat{A^{-1}} \mat{B^{1}} = \left(\mat{B A}\right)^{-1}
     \end{equation}
