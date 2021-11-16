@@ -2202,7 +2202,7 @@ up to its insertion, and the sensor error covariance.
     \item For any $n\times n$ invertible matrices $\mat{A}$ and $\mat{B}$, the 
     following holds true:
     \begin{equation}
-        \mat{A^{-1}} \mat{B^{1}} = \left(\mat{B A}\right)^{-1}
+        \mat{A^{-1}} \mat{B^{-1}} = \left(\mat{B A}\right)^{-1}
     \end{equation}
     this is true because
     \begin{equation*}
@@ -2210,7 +2210,7 @@ up to its insertion, and the sensor error covariance.
         \mat{A^{-1}}\mat{B^{-1}}\mat{B A} &= \mat{I}\\
         \mat{A^{-1}}\mat{B^{-1}}\parentheses{\mat{B A}} &= \mat{I}\\
         \mat{A^{-1}}\mat{B^{-1}}\parentheses{\mat{B A}}\magenta{\parentheses{\mat{B A}}^{-1}} &= \mat{I}\magenta{\parentheses{\mat{B A}}^{-1}} \\
-        \mat{A^{-1}} \mat{B^{1}} = \left(\mat{B A}\right)^{-1}
+        \mat{A^{-1}} \mat{B^{-1}} = \left(\mat{B A}\right)^{-1}
     \end{aligned}
     \end{equation*}
 \end{enumerate}
