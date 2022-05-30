@@ -19,7 +19,7 @@ A differential drive robot is a two-wheeled robot, the wheels are aligned and th
 
  \begin{figure}[h]
     \centering
-    \import{figs}{diff-drive}
+    \import{figs/}{diff-drive}
     \caption{Differential drive robot schematic top view. The z-axis is pointing out of the sheet. The robot`s moving coordinates frame is placed in the middle point between the wheels axle. \{s\} is a static frame of reference.}
      \label{fig:diff-drive-schematic}
  \end{figure}
@@ -50,7 +50,7 @@ A differential drive robot is a two-wheeled robot, the wheels are aligned and th
  \end{cases}
      \label{eq:diff-drive-wheels-linear-velocities}
  \end{equation}
-
+ 
  From now on, all the calculations will be made in the robot coordinates frame. The axle middle point is the robot position. One also must know the relation between linear and angular speeds in Eq. \ref{eq:angular-linear-speed}.
 
  \begin{equation}
@@ -141,8 +141,8 @@ A differential drive robot is a two-wheeled robot, the wheels are aligned and th
      \end{bmatrix} + 
      \begin{bmatrix}
          \dfrac{r}{2d}\,\Delta\theta_{L_k} - \dfrac{r}{2d} \,\Delta\theta_{R_k} \\
-         \dfrac{\Delta\theta_{R_k} + \Delta\theta_{L_k}}{\Delta\theta_{R_k} - \Delta\theta_{L_k}}\left( \sin(\phi_k + \alpha) - \sin(\phi_k) \right) \\
-         \dfrac{\Delta\theta_{R_k} + \Delta\theta_{L_k}}{\Delta\theta_{R_k} - \Delta\theta_{L_k}}\left( -\cos(\phi_k + \alpha) + \cos(\phi_k) \right) 
+         d\cdot \dfrac{\Delta\theta_{R_k} + \Delta\theta_{L_k}}{\Delta\theta_{R_k} - \Delta\theta_{L_k}}\left( \sin(\phi_k + \alpha) - \sin(\phi_k) \right) \\
+         d\cdot\dfrac{\Delta\theta_{R_k} + \Delta\theta_{L_k}}{\Delta\theta_{R_k} - \Delta\theta_{L_k}}\left( -\cos(\phi_k + \alpha) + \cos(\phi_k) \right) 
      \end{bmatrix}
  \end{equation}
  \renewcommand{\arraystretch}{1}
